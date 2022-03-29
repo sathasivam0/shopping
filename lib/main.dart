@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
       home: const Home(),
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.red,
+        primarySwatch: Colors.deepPurple,
       ),
     );
   }
