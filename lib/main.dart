@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:shopping/services/network/network_binding.dart';
 import 'package:shopping/ui/home/home.dart';
 
 Future<void> main() async {
@@ -18,12 +19,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      defaultTransition: Transition.fade,
+      opaqueRoute: Get.isOpaqueRouteDefault,
+      popGesture: Get.isPopGestureEnable,
+      initialBinding: NetworkBinding(),
       title: 'Shopping',
-      home: const Home(),
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.red,
       ),
+      home: const Home(),
     );
   }
 }
