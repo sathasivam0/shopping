@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shopping/model/product_model.dart';
@@ -36,19 +38,24 @@ class _HomeState extends State<Home> {
         color: placeholderBg,
         padding: const EdgeInsets.all(15.0),
         child: FutureBuilder<List<ProductsModel>>(
-            future: GetXNetworkManager.to.connectionType == 0 ? DBHelper.getProductsList() : ,
+            future: /*GetXNetworkManager.to.connectionType == 0 ?*/ DBHelper
+                .getProductsList() /*:*/,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 List<ProductsModel>? data = snapshot.data;
+                if (data!.isEmpty) {
+                  return const Text("No data available");
+                }
                 return ListView.builder(
-                    itemCount: data?.length,
+                    itemCount: data.length,
                     itemBuilder: (context, index) {
-                      ProductsModel productsModel = data![index];
+                      ProductsModel productsModel = data[index];
                       return SizedBox(
                         height: 70.0,
                         child: GestureDetector(
                           onTap: () {
-                            Get.to(() => const Detail());
+                            int id = productsModel.id!;
+                            Get.to(() => Detail(id));
                           },
                           child: Card(
                             color: placeholder,

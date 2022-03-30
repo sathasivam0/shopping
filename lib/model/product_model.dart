@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:shopping/services/network/get_network_manager.dart';
 
 class ProductsModel {
   int? id;
@@ -12,6 +13,7 @@ class ProductsModel {
   int? is_active;
   String? created_at;
   String? updated_at;
+  int? is_sync;
 
   ProductsModel(
       {this.id,
@@ -24,7 +26,8 @@ class ProductsModel {
       this.qty_per_order,
       this.is_active,
       this.created_at,
-      this.updated_at});
+      this.updated_at,
+      this.is_sync});
 
   ProductsModel.fromMap(Map<String, dynamic> json) {
     id = json['id'];
@@ -38,5 +41,9 @@ class ProductsModel {
     is_active = json['is_active'];
     created_at = json['created_at'];
     updated_at = json['updated_at'];
+    if (GetXNetworkManager.to.connectionType == 0) {
+      is_sync = json['is_sync'];
+    } else {
+    }
   }
 }

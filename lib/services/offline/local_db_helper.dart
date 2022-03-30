@@ -4,6 +4,8 @@ import 'package:sqflite/sqflite.dart' as sql;
 import 'package:path/path.dart' as path;
 
 class DBHelper {
+
+  /// Table Creation
   // creating products table
   static const String myProductsTable = "CREATE TABLE IF NOT EXISTS products(" +
       "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
@@ -16,7 +18,8 @@ class DBHelper {
       "qty_per_order INTEGER NOT NULL DEFAULT 0," +
       "is_active INTEGER NOT NULL DEFAULT 1," +
       "created_at TEXT DEFAULT NULL," +
-      "updated_at TEXT DEFAULT NULL" +
+      "updated_at TEXT DEFAULT NULL," +
+      "is_sync INTEGER NOT NULL DEFAULT 0" +
       ")";
 
   // creating sales table
@@ -26,7 +29,8 @@ class DBHelper {
       "ordered_at	TEXT NOT NULL," +
       "total REAL DEFAULT NULL," +
       "created_at TEXT DEFAULT NULL," +
-      "updated_at TEXT DEFAULT NULL" +
+      "updated_at TEXT DEFAULT NULL," +
+      "is_sync INTEGER NOT NULL DEFAULT 0" +
       ")";
 
   // creating sale item table
@@ -37,12 +41,13 @@ class DBHelper {
           "product_id	INTEGER NOT NULL," +
           "unit_price	REAL NOT NULL," +
           "quantity INTEGER NOT NULL," +
-          "price INTEGER NOT NULL," +
           "total REAL NOT NULL," +
           "created_at TEXT DEFAULT NULL," +
-          "updated_at TEXT DEFAULT NULL" +
+          "updated_at TEXT DEFAULT NULL," +
+          "is_sync INTEGER NOT NULL DEFAULT 0" +
           ")";
 
+  /// Opening database
   static Future<sql.Database> database() async {
     final dbPath = await sql.getDatabasesPath();
     return await sql.openDatabase(
@@ -56,8 +61,7 @@ class DBHelper {
     );
   }
 
-  // insert value to a specific table
-  static Future<int> insert(String table, Map<String, dynamic> data) async {
+  static Future<int> insertValuesTable(String table, Map<String, dynamic> data) async {
     int result = 0;
     final db = await DBHelper.database();
     result = await db.insert(table, data,
@@ -66,11 +70,22 @@ class DBHelper {
     return result;
   }
 
+
+  // get all records form products table
   static Future<List<ProductsModel>> getProductsList() async {
     final db = await DBHelper.database();
     var res = await db.query("products");
-    debugPrint('VIEW ADDED RECORDS IN DB:  $res');
-    List<ProductsModel> list = res.isNotEmpty ? res.map((c) => ProductsModel.fromMap(c)).toList() : [];
+    List<ProductsModel> list =
+        res.isNotEmpty ? res.map((c) => ProductsModel.fromMap(c)).toList() : [];
+    return list;
+  }
+
+  // getting particular product detail by id
+  static Future<List<ProductsModel>> getParticularProductDetails(int id) async {
+    final db = await DBHelper.database();
+    var res = await db.query("products", where: 'id = ?', whereArgs: [id]);
+    List<ProductsModel> list =
+        res.isNotEmpty ? res.map((c) => ProductsModel.fromMap(c)).toList() : [];
     return list;
   }
 

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shopping/model/product_model.dart';
+import 'package:shopping/services/network/get_network_manager.dart';
 import 'package:shopping/services/offline/local_db_helper.dart';
 
 import '../../res/colors.dart';
@@ -138,7 +139,12 @@ class _AddProductState extends State<AddProduct> {
       data['is_active'] = isFeaturedValue ? 1 : 0;
       data['created_at'] = "";
       data['updated_at'] = "";
-      DBHelper.insert("products", data);
+
+      // if network is not available then add data to local DB
+      // else add data to cloud
+      if (GetXNetworkManager.to.connectionType == 0) {
+        DBHelper.insertValuesTable("products", data);
+      } else {}
     }
   }
 

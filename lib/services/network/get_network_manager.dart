@@ -39,21 +39,14 @@ class GetXNetworkManager extends GetxController {
     switch (result) {
       case ConnectivityResult.wifi:
         connectionType = 1;
-        if (Get.isSnackbarOpen) {
-          Get.closeCurrentSnackbar();
-        }
         update();
         break;
       case ConnectivityResult.mobile:
         connectionType = 2;
-        if (Get.isSnackbarOpen) {
-          Get.closeCurrentSnackbar();
-        }
         update();
         break;
       case ConnectivityResult.none:
         connectionType = 0;
-        showSnackBar();
         update();
         break;
       default:
@@ -65,22 +58,5 @@ class GetXNetworkManager extends GetxController {
   @override
   void onClose() {
     _streamSubscription.cancel();
-  }
-
-  void showSnackBar(){
-    Get.snackbar("No Internet", "Please check your internet connection",
-        duration: const Duration(days: 7),
-        margin: const EdgeInsets.all(10.0),
-        snackPosition: SnackPosition.BOTTOM,
-        isDismissible: true,
-        backgroundColor: primaryColor,
-        colorText: Colors.white,
-        mainButton:
-        TextButton(onPressed:() {
-          if(connectionType != 0) {
-            Get.back();
-            update();
-          }
-        }, child: const Text("Dismiss")));
   }
 }
