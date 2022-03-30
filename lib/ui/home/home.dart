@@ -7,7 +7,7 @@ import 'package:shopping/services/network/get_network_manager.dart';
 import 'package:shopping/services/offline/local_db_helper.dart';
 import 'package:shopping/ui/add_product/add_product.dart';
 import 'package:shopping/ui/cart/cart_list_screen.dart';
-import 'package:shopping/ui/cart/cart_list_screen.dart';
+import 'package:shopping/ui/sales/sales.dart';
 import 'package:shopping/utils/screen_size.dart';
 import 'package:get/get.dart';
 
@@ -24,7 +24,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-
   dynamic emptyMapForGet = {};
 
   @override
@@ -37,12 +36,17 @@ class _HomeState extends State<Home> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
         actions: [
-          IconButton(icon: const Icon(Icons.favorite), onPressed: () {}),
-          IconButton(icon: const Icon(Icons.shopping_cart), onPressed: () {
-            Get.to(() => const CartListScreen());
-          }),
+          IconButton(
+              icon: const Icon(Icons.credit_card),
+              onPressed: () {
+                Get.to(() => const Sales());
+              }),
+          IconButton(
+              icon: const Icon(Icons.shopping_cart),
+              onPressed: () {
+                Get.to(() => const CartListScreen());
+              }),
         ],
       ),
       body: Container(
@@ -51,7 +55,10 @@ class _HomeState extends State<Home> {
         color: placeholderBg,
         padding: const EdgeInsets.all(15.0),
         child: FutureBuilder<List<ProductsModel>>(
-            future: GetXNetworkManager.to.connectionType == 0 ? DBHelper.getProductsList() :ServiceRequest(ServiceUrl.products, emptyMapForGet).getProductData(),
+            future: GetXNetworkManager.to.connectionType == 0
+                ? DBHelper.getProductsList()
+                : ServiceRequest(ServiceUrl.products, emptyMapForGet)
+                    .getProductData(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 List<ProductsModel>? data = snapshot.data;
@@ -59,9 +66,9 @@ class _HomeState extends State<Home> {
                   return const Center(child: Text("No data available"));
                 }
                 return ListView.builder(
-                    itemCount: data?.length,
+                    itemCount: data.length,
                     itemBuilder: (context, index) {
-                      ProductsModel productsModel = data![index];
+                      ProductsModel productsModel = data[index];
                       return SizedBox(
                         height: 70.0,
                         child: GestureDetector(
@@ -79,7 +86,8 @@ class _HomeState extends State<Home> {
                                     radius: 20,
                                     child: productsModel.image!.isEmpty
                                         ? const Icon(Icons.person, size: 30.0)
-                                        :  Image.file(File("${productsModel.image}"))),
+                                        : Image.file(
+                                            File("${productsModel.image}"))),
                                 const SizedBox(width: 10.0),
                                 Column(
                                   mainAxisAlignment: MainAxisAlignment.center,

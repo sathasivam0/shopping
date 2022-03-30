@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shopping/model/sales_model.dart';
 
 import '../../model/product_model.dart';
 
@@ -63,18 +64,30 @@ class ServiceRequest {
   Future<List<ProductsModel>> getProductData() async {
     final response = await http.get(Uri.parse(url), headers: header);
     if (response.statusCode == 200) {
-      debugPrint("success");
-      debugPrint("${response.statusCode}");
       var res = json.decode(response.body)["data"] as List;
       List<ProductsModel> data = res
           .map<ProductsModel>((json) => ProductsModel.fromMap(json))
           .toList();
       return data;
     } else {
-      debugPrint("Fail");
-      debugPrint("${response.statusCode}");
       throw Exception('Failed to load jobs from API');
     }
+  }
 
+  // get sales List
+  Future<List<SalesModel>> getSalesData() async {
+    final response = await http.get(Uri.parse(url), headers: header);
+    if (response.statusCode == 200) {
+      debugPrint("success");
+      debugPrint("${response.statusCode}");
+      debugPrint(response.body);
+
+      var res = json.decode(response.body)["data"] as List;
+      List<SalesModel> data =
+          res.map<SalesModel>((json) => SalesModel.fromMap(json)).toList();
+      return data;
+    } else {
+      throw Exception('Failed to load jobs from API');
+    }
   }
 }
