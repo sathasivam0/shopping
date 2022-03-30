@@ -41,7 +41,7 @@ class _HomeState extends State<Home> {
         color: placeholderBg,
         padding: const EdgeInsets.all(15.0),
         child: FutureBuilder<List<ProductsModel>>(
-            future: GetXNetworkManager.to.connectionType == 0 ? DBHelper.getProductsList() :ServiceRequest(ServiceUrl.signIn, emptyMapForGet).getProductData(),
+            future: GetXNetworkManager.to.connectionType == 0 ? DBHelper.getProductsList() :ServiceRequest(ServiceUrl.products, emptyMapForGet).getProductData(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 List<ProductsModel>? data = snapshot.data;
