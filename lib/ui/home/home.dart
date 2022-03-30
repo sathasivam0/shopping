@@ -53,7 +53,8 @@ class _HomeState extends State<Home> {
                         height: 70.0,
                         child: GestureDetector(
                           onTap: () {
-                            Get.to(() => const Detail());
+                            int id = productsModel.id!;
+                            Get.to(() => Detail(id));
                           },
                           child: Card(
                             color: placeholder,

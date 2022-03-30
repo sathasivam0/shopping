@@ -2,15 +2,15 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:shopping/services/offline/local_db_helper.dart';
-import 'package:intl/intl.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:shopping/res/colors.dart';
+import 'package:shopping/services/network/get_network_manager.dart';
+import 'package:shopping/services/offline/local_db_helper.dart';
 import 'package:shopping/ui/home/home.dart';
-
-import '../../res/colors.dart';
-import '../../utils/error_dialog.dart';
+import 'package:shopping/utils/error_dialog.dart';
 
 class AddProduct extends StatefulWidget {
   const AddProduct({Key? key}) : super(key: key);
@@ -142,7 +142,12 @@ class _AddProductState extends State<AddProduct> {
       data['is_active'] = isFeaturedValue ? 1 : 0;
       data['created_at'] = dateFormat.format(DateTime.now());
       data['updated_at'] = dateFormat.format(DateTime.now());
-      DBHelper.insert("products", data);
+      // if network is not available then add data to local DB
+      // else add data to cloud
+      if (GetXNetworkManager.to.connectionType == 0) {
+        DBHelper.insertValuesTable("products", data);
+      } else {}
+
       Get.to(() => const Home());
     }
   }
@@ -242,7 +247,8 @@ class _AddProductState extends State<AddProduct> {
                   ),
                   const Text(
                     'is-Active',
-                    style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),
+                    style:
+                        TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
