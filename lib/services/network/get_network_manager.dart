@@ -4,7 +4,6 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:shopping/res/colors.dart';
 
 class GetXNetworkManager extends GetxController {
   static GetXNetworkManager to = Get.find();

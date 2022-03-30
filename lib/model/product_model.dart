@@ -1,5 +1,6 @@
-import 'package:flutter/cupertino.dart';
+
 import 'package:shopping/services/network/get_network_manager.dart';
+// ignore_for_file: non_constant_identifier_names
 
 class ProductsModel {
   int? id;
