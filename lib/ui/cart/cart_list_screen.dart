@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:shopping/model/sales_item_model.dart';
 import 'package:shopping/model/sales_model.dart';
 import 'package:shopping/res/colors.dart';
 import 'package:shopping/services/offline/local_db_helper.dart';
@@ -19,7 +17,6 @@ class _CartListScreenState extends State<CartListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Cart'),
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
         automaticallyImplyLeading: true,
       ),
       body: Container(
@@ -33,7 +30,7 @@ class _CartListScreenState extends State<CartListScreen> {
               if (snapshot.hasData) {
                 List<SalesModel>? data = snapshot.data;
                 if (data!.isEmpty) {
-                  return const Text("No data available");
+                  return const Center(child: Text("No data available"));
                 }
                 return ListView.builder(
                     itemCount: data.length,

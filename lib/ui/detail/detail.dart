@@ -47,7 +47,8 @@ class _DetailState extends State<Detail> {
           _saleItemMap['updated_at'] = dateFormat.format(DateTime.now());
           _saleItemMap['is_sync'] = 0;
 
-          debugPrint('SHOW SALE ITEM TABLE VALIDATION NOT EMPTY: $_saleItemMap');
+          debugPrint(
+              'SHOW SALE ITEM TABLE VALIDATION NOT EMPTY: $_saleItemMap');
 
           // add values to sales item table
           DBHelper.insertValuesSalesItemTable(_saleItemMap);
@@ -102,48 +103,78 @@ class _DetailState extends State<Detail> {
         debugPrint('getRootMap');
         debugPrint('${getRootMap!}');
         debugPrint('${getRootMap!['name']}');
-        _productsModel.name =  getRootMap!['name'];
-        _productsModel.description =  getRootMap!['description'];
-        _productsModel.price =  getRootMap!['price'];
+        _productsModel.name = getRootMap!['name'];
+        _productsModel.description = getRootMap!['description'];
+        _productsModel.price = getRootMap!['price'];
       });
     });
   }
+
+  int myQuantity = 1;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: const Text("Detail"),
-          systemOverlayStyle: SystemUiOverlayStyle.dark),
+          title: const Text("Detail"),),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Image.asset("assets/men.png"),
-          const SizedBox(width: 50.0),
+          const SizedBox(height: 20.0),
+          Center(
+              child: Image.asset("assets/men.png",
+                  height: 200.0, fit: BoxFit.cover)),
+          const SizedBox(height: 35.0),
           Container(
-            height: 100.0,
             padding: const EdgeInsets.only(left: 15.0, top: 10.0),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(_productsModel.name!,
                     style:
                         const TextStyle(color: txtGreyColor, fontSize: 25.0)),
+                const SizedBox(height: 10.0),
                 Text(_productsModel.description!,
                     style: const TextStyle(color: black, fontSize: 18.0)),
-                Text("₹${_productsModel.price!}",
+                const SizedBox(height: 10.0),
+                Text("₹ ${_productsModel.price!}",
                     style: const TextStyle(
-                        color: black, fontWeight: FontWeight.bold)),
+                        color: black, fontWeight: FontWeight.bold,fontSize: 16.0)),
+                const SizedBox(height: 10.0),
+                Row(
+                  children: [
+                    IconButton(
+                        onPressed: () {
+                          setState(() {
+                            if (myQuantity != 1) {
+                              myQuantity--;
+                            } else {}
+                          });
+                        },
+                        icon: const Icon(Icons.remove)),
+                    const SizedBox(width: 10.0),
+                    Text(myQuantity.toString(),style: const TextStyle(fontSize: 16.0),),
+                    const SizedBox(width: 10.0),
+                    IconButton(
+                        onPressed: () {
+                          setState(() {
+                            myQuantity++;
+                          });
+                        },
+                        icon: const Icon(Icons.add)),
+                  ],
+                ),
               ],
             ),
           ),
+
+          const SizedBox(height: 20.0),
           Center(
               child: ElevatedButton(
                   onPressed: () async {
                     checkValidation();
                   },
-                  child: const Text("Add to cart")))
+                  child: const Text("Add to cart",style:TextStyle(fontSize: 18.0),)))
         ],
       ),
     );

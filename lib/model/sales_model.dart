@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:shopping/services/network/get_network_manager.dart';
 
 class SalesModel {
@@ -22,7 +24,7 @@ class SalesModel {
     id = json['id'];
     order_no = json['order_no'];
     ordered_at = json['ordered_at'];
-    total = json['total'];
+    total = double.parse(json['total'].toString());
     created_at = json['created_at'];
     updated_at = json['updated_at'];
     if (GetXNetworkManager.to.connectionType == 0) {
