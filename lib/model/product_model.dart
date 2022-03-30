@@ -26,22 +26,6 @@ class ProductsModel {
       this.created_at,
       this.updated_at});
 
-  // converting values to map
-  Map<String, dynamic> toMap() {
-    var data = <String, dynamic>{};
-    data['name'] = name;
-    data['slug'] = slug;
-    data['description'] = description;
-    data['image'] = image;
-    data['price'] = price;
-    data['in_stock'] = in_stock;
-    data['qty_per_order'] = qty_per_order;
-    data['is_active'] = is_active;
-    data['created_at'] = created_at;
-    data['updated_at'] = updated_at;
-    return data;
-  }
-
   ProductsModel.fromMap(Map<String, dynamic> json) {
     id = json['id'];
     name = json['name'];

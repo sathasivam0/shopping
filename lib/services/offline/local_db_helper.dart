@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:shopping/model/product_model.dart';
 import 'package:sqflite/sqflite.dart' as sql;
 import 'package:path/path.dart' as path;
 
@@ -60,19 +62,19 @@ class DBHelper {
     final db = await DBHelper.database();
     result = await db.insert(table, data,
         conflictAlgorithm: sql.ConflictAlgorithm.replace);
+    debugPrint('RECORD IS ADDED:  $result');
     return result;
   }
 
-  // getAllClients() async {
-  //   final db = await database;
-  //   var res = await db.query("Client");
-  //   List<Client> list =
-  //   res.isNotEmpty ? res.map((c) => Client.fromMap(c)).toList() : [];
-  //   return list;
-  // }
+  static Future<List<ProductsModel>> getProductsList() async {
+    final db = await DBHelper.database();
+    var res = await db.query("products");
+    debugPrint('VIEW ADDED RECORDS IN DB:  $res');
+    List<ProductsModel> list = res.isNotEmpty ? res.map((c) => ProductsModel.fromMap(c)).toList() : [];
+    return list;
+  }
 
   // to get all the record from the specific table
-
   static Future<List<Map<String, dynamic>>> getData(String table) async {
     final db = await DBHelper.database();
     var res = await db.query(table);

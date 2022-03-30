@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shopping/model/product_model.dart';
+import 'package:shopping/services/offline/local_db_helper.dart';
 
 import '../../res/colors.dart';
 import '../../utils/error_dialog.dart';
@@ -76,7 +78,7 @@ class _AddProductState extends State<AddProduct> {
               message: "Please enter price amount",
             );
           });
-    }else if (priceController.text == "0") {
+    } else if (priceController.text == "0") {
       showDialog(
           context: context,
           builder: (c) {
@@ -108,7 +110,7 @@ class _AddProductState extends State<AddProduct> {
               message: "Please enter quantity",
             );
           });
-    }else if (quantityController.text.length >=10) {
+    } else if (quantityController.text.length >= 10) {
       showDialog(
           context: context,
           builder: (c) {
@@ -116,7 +118,7 @@ class _AddProductState extends State<AddProduct> {
               message: "qty per order must be less than or equal to 10",
             );
           });
-    }else if(isFeaturedValue == false){
+    } else if (isFeaturedValue == false) {
       showDialog(
           context: context,
           builder: (c) {
@@ -124,13 +126,26 @@ class _AddProductState extends State<AddProduct> {
               message: "is-Active is not selected",
             );
           });
+    } else {
+      Map<String, dynamic> data = <String, dynamic>{};
+      data['name'] = nameController.text.toString();
+      data['slug'] = nameController.text.toString().toLowerCase();
+      data['description'] = descriptionController.text.toLowerCase();
+      data['image'] = "";
+      data['price'] = int.parse(priceController.text.toString());
+      data['in_stock'] = int.parse(inStockController.text.toString());
+      data['qty_per_order'] = int.parse(quantityController.text.toString());
+      data['is_active'] = isFeaturedValue ? 1 : 0;
+      data['created_at'] = "";
+      data['updated_at'] = "";
+      DBHelper.insert("products", data);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset : false,
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
           title: const Text("Add Product"),
           systemOverlayStyle: SystemUiOverlayStyle.dark),
@@ -216,9 +231,11 @@ class _AddProductState extends State<AddProduct> {
                 ),
               ],
             ),
-            ElevatedButton(onPressed: () {
-              formValidation();
-            }, child: const Text("Submit"))
+            ElevatedButton(
+                onPressed: () {
+                  formValidation();
+                },
+                child: const Text("Submit"))
           ],
         ),
       ),
