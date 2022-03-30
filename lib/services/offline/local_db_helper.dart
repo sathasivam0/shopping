@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:shopping/main.dart';
 import 'package:shopping/model/product_model.dart';
+import 'package:shopping/model/sales_item_model.dart';
+import 'package:shopping/model/sales_model.dart';
 import 'package:sqflite/sqflite.dart' as sql;
 import 'package:path/path.dart' as path;
 
@@ -61,22 +64,20 @@ class DBHelper {
     );
   }
 
-  static Future<int> insertValuesTable(String table, Map<String, dynamic> data) async {
+  // insert values to products table
+  static Future<int> insertValuesToProductsTable(Map<String, dynamic> data) async {
     int result = 0;
     final db = await DBHelper.database();
-    result = await db.insert(table, data,
-        conflictAlgorithm: sql.ConflictAlgorithm.replace);
-    debugPrint('RECORD IS ADDED:  $result');
+    result = await db.insert('products', data, conflictAlgorithm: sql.ConflictAlgorithm.replace);
+    debugPrint('RECORD IS ADDED PRODUCTS TABLE:  $result');
     return result;
   }
-
 
   // get all records form products table
   static Future<List<ProductsModel>> getProductsList() async {
     final db = await DBHelper.database();
     var res = await db.query("products");
-    List<ProductsModel> list =
-        res.isNotEmpty ? res.map((c) => ProductsModel.fromMap(c)).toList() : [];
+    List<ProductsModel> list = res.isNotEmpty ? res.map((c) => ProductsModel.fromMap(c)).toList() : [];
     return list;
   }
 
@@ -85,20 +86,60 @@ class DBHelper {
     final db = await DBHelper.database();
     var res = await db.query("products", where: 'id = ?', whereArgs: [id]);
     List<ProductsModel> list =
-        res.isNotEmpty ? res.map((c) => ProductsModel.fromMap(c)).toList() : [];
+    res.isNotEmpty ? res.map((c) => ProductsModel.fromMap(c)).toList() : [];
     return list;
   }
 
-  // to get all the record from the specific table
-  static Future<List<Map<String, dynamic>>> getData(String table) async {
+  /// Sales Table
+  // Insert values to sales table
+  static Future<int> insertValuesToSalesTable(Map<String, dynamic> data) async{
+    int result = 0;
     final db = await DBHelper.database();
-    var res = await db.query(table);
-    return res.isNotEmpty ? await db.query(table) : [];
+    result = await db.insert('sales', data, conflictAlgorithm: sql.ConflictAlgorithm.replace);
+    debugPrint('RECORD IS ADDED SALES TABLE:  $result');
+    return result;
+  }
+
+  // get all records form sales table
+  static Future<List<SalesModel>> getSalesList() async {
+    final db = await DBHelper.database();
+    var res = await db.query("sales");
+    List<SalesModel> list = res.isNotEmpty ? res.map((c) => SalesModel.fromMap(c)).toList() : [];
+    return list;
+  }
+
+  /// Sales Item Table
+  // Insert values to sales item table
+  static Future<int> insertValuesSalesItemTable(Map<String, dynamic> data) async {
+    int result = 0;
+    final db = await DBHelper.database();
+    var maxIdResult = await db.rawQuery("SELECT MAX(id) as last_inserted_id FROM sales");
+    var id = maxIdResult.first["last_inserted_id"];
+    debugPrint('SHOW LAST ADDED SALES ID: $id');
+
+    data['sale_id'] = id;
+
+    debugPrint('SHOW LAST ADDED SALES ITEM MAP: $data');
+
+    debugPrint('SHOW LAST ADDED SALES ITEM MAP: ${data['total']}');
+
+    result = await db.insert('sales_item', data, conflictAlgorithm: sql.ConflictAlgorithm.replace);
+
+    updateById('sales','total',data['total'],id.toString());
+    debugPrint('RECORD IS ADDED SALES ITEM TABLE:  $result');
+    return result;
+  }
+
+  // get all records from sales item table
+  static Future<List<SalesItemModel>> getSalesItemList() async {
+    final db = await DBHelper.database();
+    var res = await db.query("sales_item");
+    List<SalesItemModel> list = res.isNotEmpty ? res.map((c) => SalesItemModel.fromMap(c)).toList() : [];
+    return list;
   }
 
   // to update a field in a table
-  static Future<void> updateById(
-      String table, String column, String value, String id) async {
+  static Future<void> updateById(String table, String column, double value, String id) async {
     final db = await DBHelper.database();
     await db.rawUpdate(
       "UPDATE  $table SET $column = '$value' WHERE id = '$id' ",
@@ -108,17 +149,12 @@ class DBHelper {
   static deleteItem(String id) async {
     final db = await DBHelper.database();
     return await db
-        .rawDelete('DELETE FROM transaction_data WHERE id = ?', [id]);
-  }
-
-  // truncate table
-  static Future<void> truncateTable(String tableName) async {
-    final db = await DBHelper.database();
-    await db.rawDelete('DELETE FROM $tableName ');
+        .rawDelete('DELETE FROM sales WHERE id = ?', [id]);
   }
 
   static close() async {
     final db = await DBHelper.database();
     db.close();
   }
+
 }

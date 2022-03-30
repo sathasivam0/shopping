@@ -135,17 +135,18 @@ class _AddProductState extends State<AddProduct> {
       data['name'] = nameController.text.toString();
       data['slug'] = nameController.text.toString().toLowerCase();
       data['description'] = descriptionController.text.toLowerCase();
-      data['image'] = imageXFile!.path;
+      data['image'] = imageXFile == null ? "" : imageXFile!.path;
       data['price'] = int.parse(priceController.text.toString());
       data['in_stock'] = int.parse(inStockController.text.toString());
       data['qty_per_order'] = int.parse(quantityController.text.toString());
       data['is_active'] = isFeaturedValue ? 1 : 0;
       data['created_at'] = dateFormat.format(DateTime.now());
       data['updated_at'] = dateFormat.format(DateTime.now());
+      data['is_sync'] = 0;
       // if network is not available then add data to local DB
       // else add data to cloud
       if (GetXNetworkManager.to.connectionType == 0) {
-        DBHelper.insertValuesTable("products", data);
+        DBHelper.insertValuesToProductsTable(data);
       } else {}
 
       Get.to(() => const Home());

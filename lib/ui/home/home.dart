@@ -1,11 +1,10 @@
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shopping/model/product_model.dart';
-import 'package:shopping/services/network/get_network_manager.dart';
 import 'package:shopping/services/offline/local_db_helper.dart';
 import 'package:shopping/ui/add_product/add_product.dart';
+import 'package:shopping/ui/cart/cart_list_screen.dart';
 import 'package:shopping/utils/screen_size.dart';
 import 'package:get/get.dart';
 
@@ -20,10 +19,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +26,12 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         title: const Text('Home'),
         systemOverlayStyle: SystemUiOverlayStyle.dark,
+        actions: [
+          IconButton(icon: const Icon(Icons.favorite), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.shopping_cart), onPressed: () {
+            Get.to(() => const CartListScreen());
+          }),
+        ],
       ),
       body: Container(
         height: ScreenSize.getScreenHeight(context),
@@ -44,7 +45,7 @@ class _HomeState extends State<Home> {
               if (snapshot.hasData) {
                 List<ProductsModel>? data = snapshot.data;
                 if (data!.isEmpty) {
-                  return const Text("No data available");
+                  return const Center(child: Text("No data available"));
                 }
                 return ListView.builder(
                     itemCount: data.length,
