@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shopping/model/product_model.dart';
+import 'package:shopping/services/network/get_network_manager.dart';
+import 'package:shopping/services/offline/local_db_helper.dart';
 import 'package:shopping/ui/add_product/add_product.dart';
 import 'package:shopping/utils/screen_size.dart';
 import 'package:get/get.dart';
@@ -16,6 +19,11 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -27,42 +35,55 @@ class _HomeState extends State<Home> {
         width: ScreenSize.getScreenWidth(context),
         color: placeholderBg,
         padding: const EdgeInsets.all(15.0),
-        child: ListView.builder(
-            itemCount: 17,
-            itemBuilder: (context, index) {
-              return SizedBox(
-                height: 70.0,
-                child: GestureDetector(
-                  onTap: () {
-                    Get.to(() => const Detail());
-                  },
-                  child: Card(
-                    color: placeholder,
-                    child: Row(
-                      children: [
-                        const SizedBox(width: 10.0),
-                        const CircleAvatar(
-                            backgroundColor: hintColor,
-                            radius: 20,
-                            child: Icon(Icons.person, size: 30.0)),
-                        const SizedBox(width: 10.0),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            Text("Karthik.k",
-                                style: TextStyle(
-                                    fontSize: 15.0,
-                                    fontWeight: FontWeight.bold)),
-                            SizedBox(height: 5.0),
-                            Text("Flutter Developer"),
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              );
+        child: FutureBuilder<List<ProductsModel>>(
+            future: GetXNetworkManager.to.connectionType == 0 ? DBHelper.getProductsList() : ,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                List<ProductsModel>? data = snapshot.data;
+                return ListView.builder(
+                    itemCount: data?.length,
+                    itemBuilder: (context, index) {
+                      ProductsModel productsModel = data![index];
+                      return SizedBox(
+                        height: 70.0,
+                        child: GestureDetector(
+                          onTap: () {
+                            Get.to(() => const Detail());
+                          },
+                          child: Card(
+                            color: placeholder,
+                            child: Row(
+                              children: [
+                                const SizedBox(width: 10.0),
+                                CircleAvatar(
+                                    backgroundColor: hintColor,
+                                    radius: 20,
+                                    child: productsModel.image!.isEmpty
+                                        ? const Icon(Icons.person, size: 30.0)
+                                        : const Icon(Icons.star, size: 30.0)),
+                                const SizedBox(width: 10.0),
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(productsModel.name!,
+                                        style: const TextStyle(
+                                            fontSize: 15.0,
+                                            fontWeight: FontWeight.bold)),
+                                    const SizedBox(height: 5.0),
+                                    Text(productsModel.description!),
+                                  ],
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    });
+              } else if (snapshot.hasError) {
+                return Text("${snapshot.error}");
+              }
+              return const Center(child: CircularProgressIndicator());
             }),
       ),
       floatingActionButton: FloatingActionButton(
