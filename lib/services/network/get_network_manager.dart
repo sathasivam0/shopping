@@ -4,6 +4,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:shopping/services/offline/local_db_helper.dart';
 
 class GetXNetworkManager extends GetxController {
   static GetXNetworkManager to = Get.find();
@@ -18,8 +19,7 @@ class GetXNetworkManager extends GetxController {
   void onInit() {
     super.onInit();
     getConnectionType();
-    _streamSubscription =
-        _connectivity.onConnectivityChanged.listen(_updateState);
+    _streamSubscription = _connectivity.onConnectivityChanged.listen(_updateState);
   }
 
   Future<void> getConnectionType() async {
@@ -36,16 +36,21 @@ class GetXNetworkManager extends GetxController {
   // and update the state to the consumer of that variable.
   _updateState(ConnectivityResult result) {
     switch (result) {
+      case ConnectivityResult.none:
+        debugPrint('NO INTERNET');
+        connectionType = 0;
+        update();
+        break;
       case ConnectivityResult.wifi:
+        debugPrint('WIFI CONNECTED');
         connectionType = 1;
+        DBHelper.getParticularProductsInOffline(0);
         update();
         break;
       case ConnectivityResult.mobile:
+        debugPrint('MOBILE CONNECTED');
         connectionType = 2;
-        update();
-        break;
-      case ConnectivityResult.none:
-        connectionType = 0;
+        DBHelper.getParticularProductsInOffline(0);
         update();
         break;
       default:

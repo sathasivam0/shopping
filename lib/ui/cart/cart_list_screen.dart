@@ -17,19 +17,18 @@ class _CartListScreenState extends State<CartListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Cart'),
-          systemOverlayStyle: SystemUiOverlayStyle.dark,
-          automaticallyImplyLeading: true,
-        ),
+      appBar: AppBar(
+        title: const Text('Cart'),
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
+        automaticallyImplyLeading: true,
+      ),
       body: Container(
         height: ScreenSize.getScreenHeight(context),
         width: ScreenSize.getScreenWidth(context),
         color: placeholderBg,
         padding: const EdgeInsets.all(15.0),
         child: FutureBuilder<List<SalesModel>>(
-            future: /*GetXNetworkManager.to.connectionType == 0 ?*/ DBHelper
-                .getSalesList() /*:*/,
+            future: DBHelper.getSalesList(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 List<SalesModel>? data = snapshot.data;

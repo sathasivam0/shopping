@@ -1,4 +1,3 @@
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,15 +22,9 @@ class Detail extends StatefulWidget {
 
 class _DetailState extends State<Detail> {
   DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
+  final DateFormat dateFormatForOrderNo = DateFormat("yyyymmddHHmmss");
 
   ProductsModel _productsModel = ProductsModel();
-
-  static const _chars =
-      'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
-  final Random _rnd = Random();
-
-  String getRandomString(int length) => String.fromCharCodes(Iterable.generate(
-      length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
 
   void checkValidation() {
     // check network connection
@@ -42,6 +35,7 @@ class _DetailState extends State<Detail> {
         Map<String, dynamic> _saleItemMap = <String, dynamic>{};
         // sale map
         Map<String, dynamic> _saleMap = <String, dynamic>{};
+
         if (value.isNotEmpty) {
           _saleItemMap['product_id'] = _productsModel.id!;
           _saleItemMap['unit_price'] =
@@ -58,7 +52,7 @@ class _DetailState extends State<Detail> {
           // add values to sales item table
           DBHelper.insertValuesSalesItemTable(_saleItemMap);
         } else {
-          _saleMap['order_no'] = getRandomString(8);
+          _saleMap['order_no'] = dateFormatForOrderNo.format(DateTime.now());
           _saleMap['ordered_at'] = dateFormat.format(DateTime.now());
           _saleMap['total'] = 0;
           _saleMap['created_at'] = dateFormat.format(DateTime.now());
@@ -67,10 +61,12 @@ class _DetailState extends State<Detail> {
 
           debugPrint('SHOW SALE ITEM TABLE VALIDATION EMPTY: $_saleMap');
           // create empty sales table first
-          DBHelper.insertValuesToSalesTable(_saleMap);
-          // add values to sales item table
-          DBHelper.insertValuesSalesItemTable(_saleItemMap);
+          DBHelper.insertValuesToSalesTable(_saleMap).then((value){
+            // add values to sales item table
+            DBHelper.insertValuesSalesItemTable(_saleItemMap);
+          });
         }
+
       });
     } else {}
   }

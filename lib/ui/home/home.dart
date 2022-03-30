@@ -1,12 +1,12 @@
 import 'dart:io';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shopping/model/product_model.dart';
 import 'package:shopping/services/network/get_network_manager.dart';
 import 'package:shopping/services/offline/local_db_helper.dart';
 import 'package:shopping/ui/add_product/add_product.dart';
-import 'package:shopping/ui/cart/cart_list_screen.dart';
 import 'package:shopping/ui/cart/cart_list_screen.dart';
 import 'package:shopping/utils/screen_size.dart';
 import 'package:get/get.dart';
@@ -24,12 +24,16 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-
   dynamic emptyMapForGet = {};
 
   @override
   void initState() {
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -40,9 +44,11 @@ class _HomeState extends State<Home> {
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         actions: [
           IconButton(icon: const Icon(Icons.favorite), onPressed: () {}),
-          IconButton(icon: const Icon(Icons.shopping_cart), onPressed: () {
-            Get.to(() => const CartListScreen());
-          }),
+          IconButton(
+              icon: const Icon(Icons.shopping_cart),
+              onPressed: () {
+                Get.to(() => const CartListScreen());
+              }),
         ],
       ),
       body: Container(
@@ -50,60 +56,75 @@ class _HomeState extends State<Home> {
         width: ScreenSize.getScreenWidth(context),
         color: placeholderBg,
         padding: const EdgeInsets.all(15.0),
-        child: FutureBuilder<List<ProductsModel>>(
-            future: GetXNetworkManager.to.connectionType == 0 ? DBHelper.getProductsList() :ServiceRequest(ServiceUrl.products, emptyMapForGet).getProductData(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                List<ProductsModel>? data = snapshot.data;
-                if (data!.isEmpty) {
-                  return const Center(child: Text("No data available"));
-                }
-                return ListView.builder(
-                    itemCount: data?.length,
-                    itemBuilder: (context, index) {
-                      ProductsModel productsModel = data![index];
-                      return SizedBox(
-                        height: 70.0,
-                        child: GestureDetector(
-                          onTap: () {
-                            int id = productsModel.id!;
-                            Get.to(() => Detail(id));
-                          },
-                          child: Card(
-                            color: placeholder,
-                            child: Row(
-                              children: [
-                                const SizedBox(width: 10.0),
-                                CircleAvatar(
-                                    backgroundColor: hintColor,
-                                    radius: 20,
-                                    child: productsModel.image!.isEmpty
-                                        ? const Icon(Icons.person, size: 30.0)
-                                        :  Image.file(File("${productsModel.image}"))),
-                                const SizedBox(width: 10.0),
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+        child: StreamBuilder(
+          stream: Connectivity().onConnectivityChanged,
+          builder: (context, AsyncSnapshot<ConnectivityResult> snapshot) {
+            int aConnectionType = 0;
+            if(snapshot.data == ConnectivityResult.mobile || snapshot.data == ConnectivityResult.wifi) {
+              aConnectionType = 1;
+            } else if(snapshot.data == ConnectivityResult.none) {
+              aConnectionType = 0;
+            } else {
+              aConnectionType = 0;
+            }
+            return FutureBuilder<List<ProductsModel>>(
+                future: aConnectionType == 0 ? DBHelper.getProductsList() : ServiceRequest(ServiceUrl.products, emptyMapForGet)
+                    .getProductData(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    List<ProductsModel>? data = snapshot.data;
+                    if (data!.isEmpty) {
+                      return const Center(child: Text("No data available"));
+                    }
+                    return ListView.builder(
+                        itemCount: data.length,
+                        itemBuilder: (context, index) {
+                          ProductsModel productsModel = data[index];
+                          return SizedBox(
+                            height: 70.0,
+                            child: GestureDetector(
+                              onTap: () {
+                                int id = productsModel.id!;
+                                Get.to(() => Detail(id));
+                              },
+                              child: Card(
+                                color: placeholder,
+                                child: Row(
                                   children: [
-                                    Text(productsModel.name!,
-                                        style: const TextStyle(
-                                            fontSize: 15.0,
-                                            fontWeight: FontWeight.bold)),
-                                    const SizedBox(height: 5.0),
-                                    Text(productsModel.description!),
+                                    const SizedBox(width: 10.0),
+                                    CircleAvatar(
+                                        backgroundColor: hintColor,
+                                        radius: 20,
+                                        child: productsModel.image!.isEmpty
+                                            ? const Icon(Icons.person, size: 30.0)
+                                            : Image.file(
+                                            File("${productsModel.image}"))),
+                                    const SizedBox(width: 10.0),
+                                    Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(productsModel.name!,
+                                            style: const TextStyle(
+                                                fontSize: 15.0,
+                                                fontWeight: FontWeight.bold)),
+                                        const SizedBox(height: 5.0),
+                                        Text(productsModel.description!),
+                                      ],
+                                    )
                                   ],
-                                )
-                              ],
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                      );
-                    });
-              } else if (snapshot.hasError) {
-                return Text("${snapshot.error}");
-              }
-              return const Center(child: CircularProgressIndicator());
-            }),
+                          );
+                        });
+                  } else if (snapshot.hasError) {
+                    return Text("${snapshot.error}");
+                  }
+                  return const Center(child: CircularProgressIndicator());
+                });
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {

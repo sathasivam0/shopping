@@ -90,6 +90,15 @@ class DBHelper {
     return list;
   }
 
+  // getting particular product detail by id
+  static Future<List<ProductsModel>> getParticularProductsInOffline(int is_sync) async {
+    final db = await DBHelper.database();
+    var res = await db.query("products", where: 'is_sync = ?', whereArgs: [is_sync]);
+    List<ProductsModel> list =
+    res.isNotEmpty ? res.map((c) => ProductsModel.fromMap(c)).toList() : [];
+    return list;
+  }
+
   /// Sales Table
   // Insert values to sales table
   static Future<int> insertValuesToSalesTable(Map<String, dynamic> data) async{
@@ -118,10 +127,6 @@ class DBHelper {
     debugPrint('SHOW LAST ADDED SALES ID: $id');
 
     data['sale_id'] = id;
-
-    debugPrint('SHOW LAST ADDED SALES ITEM MAP: $data');
-
-    debugPrint('SHOW LAST ADDED SALES ITEM MAP: ${data['total']}');
 
     result = await db.insert('sales_item', data, conflictAlgorithm: sql.ConflictAlgorithm.replace);
 
