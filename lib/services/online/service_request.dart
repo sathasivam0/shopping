@@ -20,8 +20,7 @@ class ServiceRequest {
   // get Data without Token
   Future getData() async {
     try {
-      final putResponse =
-      await http.get(Uri.parse(url), headers: header);
+      final putResponse = await http.get(Uri.parse(url), headers: header);
       if (putResponse.statusCode == 200) {
         var getData = putResponse.body;
         Map<String, dynamic> getResult = jsonDecode(getData);
@@ -37,7 +36,6 @@ class ServiceRequest {
       debugPrint('StackTrace: $s');
     }
   }
-
 
   //Post data without token
   Future postData() async {
@@ -61,17 +59,22 @@ class ServiceRequest {
     }
   }
 
-
   // get Members List
   Future<List<ProductsModel>> getProductData() async {
     final response = await http.get(Uri.parse(url), headers: header);
     if (response.statusCode == 200) {
+      debugPrint("success");
+      debugPrint("${response.statusCode}");
       var res = json.decode(response.body)["data"] as List;
-      List<ProductsModel> data =
-      res.map<ProductsModel>((json) => ProductsModel.fromMap(json)).toList();
+      List<ProductsModel> data = res
+          .map<ProductsModel>((json) => ProductsModel.fromMap(json))
+          .toList();
       return data;
     } else {
+      debugPrint("Fail");
+      debugPrint("${response.statusCode}");
       throw Exception('Failed to load jobs from API');
     }
+
   }
 }

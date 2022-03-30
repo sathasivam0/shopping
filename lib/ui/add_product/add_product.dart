@@ -9,6 +9,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shopping/res/colors.dart';
 import 'package:shopping/services/network/get_network_manager.dart';
 import 'package:shopping/services/offline/local_db_helper.dart';
+import 'package:shopping/services/online/service_request.dart';
+import 'package:shopping/services/online/service_url.dart';
 import 'package:shopping/ui/home/home.dart';
 import 'package:shopping/utils/error_dialog.dart';
 
@@ -38,6 +40,16 @@ class _AddProductState extends State<AddProduct> {
       } else {
         debugPrint('Please give permission');
       }
+    }
+  }
+
+  dynamic map;
+
+  Future<dynamic> addProductData(url, map) async {
+    var result = await ServiceRequest(url, map).postData();
+    bool status = result["status"];
+    if (status == true) {
+      debugPrint("Successfully added");
     }
   }
 
@@ -147,11 +159,24 @@ class _AddProductState extends State<AddProduct> {
       // else add data to cloud
       if (GetXNetworkManager.to.connectionType == 0) {
         DBHelper.insertValuesToProductsTable(data);
-      } else {}
+      } else {
+        map = {
+          "name" : nameController.text.toString(),
+          "description" : descriptionController.text.toString(),
+          "image" :"",
+          "price" : priceController.text.toString(),
+          "in_stock" : inStockController.text.toString(),
+          "qty_per_order" :quantityController.text.toString(),
+          "is_active" : isFeaturedValue ? 1 : 0
+        };
+        addProductData(ServiceUrl.addProduct, map);
+      }
 
       Get.to(() => const Home());
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -230,8 +255,8 @@ class _AddProductState extends State<AddProduct> {
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
                   icon: Icon(Icons.queue),
-                  hintText: 'Enter Qty/Order',
-                  labelText: 'Quantity *',
+                  hintText: 'Enter Quantity Per Order',
+                  labelText: 'Quantity Per Order *',
                 ),
               ),
               const SizedBox(height: 10.0),

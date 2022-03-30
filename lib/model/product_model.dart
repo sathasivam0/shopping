@@ -1,4 +1,3 @@
-
 import 'package:shopping/services/network/get_network_manager.dart';
 // ignore_for_file: non_constant_identifier_names
 
@@ -32,9 +31,9 @@ class ProductsModel {
 
   ProductsModel.fromMap(Map<String, dynamic> json) {
     id = json['id'];
-    name = json['name'];
+    name = json['name'] as String? ?? '';
     slug = json['slug'];
-    description = json['description'];
+    description = json['description'] as String? ?? '';
     image = json['image'];
     price = json['price'];
     in_stock = json['in_stock'];
@@ -44,7 +43,6 @@ class ProductsModel {
     updated_at = json['updated_at'];
     if (GetXNetworkManager.to.connectionType == 0) {
       is_sync = json['is_sync'];
-    } else {
-    }
+    } else {}
   }
 }
