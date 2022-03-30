@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shopping/model/product_model.dart';
@@ -66,7 +68,7 @@ class _HomeState extends State<Home> {
                                     radius: 20,
                                     child: productsModel.image!.isEmpty
                                         ? const Icon(Icons.person, size: 30.0)
-                                        : const Icon(Icons.star, size: 30.0)),
+                                        :  Image.file(File("${productsModel.image}"))),
                                 const SizedBox(width: 10.0),
                                 Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
