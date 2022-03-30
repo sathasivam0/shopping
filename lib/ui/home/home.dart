@@ -8,6 +8,8 @@ import 'package:shopping/utils/screen_size.dart';
 import 'package:get/get.dart';
 
 import '../../res/colors.dart';
+import '../../services/online/service_request.dart';
+import '../../services/online/service_url.dart';
 import '../detail/detail.dart';
 
 class Home extends StatefulWidget {
@@ -18,6 +20,9 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+
+  dynamic emptyMapForGet = {};
+
   @override
   void initState() {
     super.initState();
@@ -36,7 +41,7 @@ class _HomeState extends State<Home> {
         color: placeholderBg,
         padding: const EdgeInsets.all(15.0),
         child: FutureBuilder<List<ProductsModel>>(
-            future: GetXNetworkManager.to.connectionType == 0 ? DBHelper.getProductsList() : ,
+            future: GetXNetworkManager.to.connectionType == 0 ? DBHelper.getProductsList() :ServiceRequest(ServiceUrl.signIn, emptyMapForGet).getProductData(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 List<ProductsModel>? data = snapshot.data;

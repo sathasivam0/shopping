@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:shopping/model/product_model.dart';
 import 'package:shopping/services/offline/local_db_helper.dart';
+import 'package:intl/intl.dart';
+import 'package:get/get.dart';
+import 'package:shopping/ui/home/home.dart';
 
 import '../../res/colors.dart';
 import '../../utils/error_dialog.dart';
@@ -38,6 +40,8 @@ class _AddProductState extends State<AddProduct> {
       }
     }
   }
+
+  DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
 
   TextEditingController nameController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
@@ -131,112 +135,124 @@ class _AddProductState extends State<AddProduct> {
       data['name'] = nameController.text.toString();
       data['slug'] = nameController.text.toString().toLowerCase();
       data['description'] = descriptionController.text.toLowerCase();
-      data['image'] = "";
+      data['image'] = imageXFile!.path;
       data['price'] = int.parse(priceController.text.toString());
       data['in_stock'] = int.parse(inStockController.text.toString());
       data['qty_per_order'] = int.parse(quantityController.text.toString());
       data['is_active'] = isFeaturedValue ? 1 : 0;
-      data['created_at'] = "";
-      data['updated_at'] = "";
+      data['created_at'] = dateFormat.format(DateTime.now());
+      data['updated_at'] = dateFormat.format(DateTime.now());
       DBHelper.insert("products", data);
+      Get.to(() => const Home());
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
           title: const Text("Add Product"),
           systemOverlayStyle: SystemUiOverlayStyle.dark),
-      body: Container(
-        padding: const EdgeInsets.all(15.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            InkWell(
-              onTap: () {
-                _getImage();
-              },
-              child: CircleAvatar(
-                radius: MediaQuery.of(context).size.width * 0.20,
-                backgroundColor: Colors.white,
-                backgroundImage: imageXFile == null
-                    ? null
-                    : FileImage(File(imageXFile!.path)),
-                child: imageXFile == null
-                    ? Icon(
-                        Icons.add_photo_alternate,
-                        size: MediaQuery.of(context).size.width * 0.20,
-                        color: Colors.grey,
-                      )
-                    : null,
-              ),
-            ),
-            TextFormField(
-              controller: nameController,
-              decoration: const InputDecoration(
-                icon: Icon(Icons.person),
-                hintText: 'Enter name',
-                labelText: 'Name *',
-              ),
-            ),
-            TextFormField(
-              controller: descriptionController,
-              maxLines: 3,
-              decoration: const InputDecoration(
-                icon: Icon(Icons.description),
-                hintText: 'Enter Description',
-                labelText: 'Description *',
-              ),
-            ),
-            TextFormField(
-              controller: priceController,
-              decoration: const InputDecoration(
-                icon: Icon(Icons.monetization_on),
-                hintText: 'Enter Price',
-                labelText: 'Price *',
-              ),
-            ),
-            TextFormField(
-              controller: inStockController,
-              decoration: const InputDecoration(
-                icon: Icon(Icons.stop_circle_rounded),
-                hintText: 'Enter Stock',
-                labelText: 'In-stock *',
-              ),
-            ),
-            TextFormField(
-              controller: quantityController,
-              decoration: const InputDecoration(
-                icon: Icon(Icons.queue),
-                hintText: 'Enter Qty/Order',
-                labelText: 'Quantity *',
-              ),
-            ),
-            Row(
-              children: [
-                Checkbox(
-                  value: isFeaturedValue,
-                  activeColor: blueLogo,
-                  onChanged: (bool? value) {
-                    setState(() {
-                      isFeaturedValue = value!;
-                    });
-                  },
-                ),
-                const Text(
-                  'is-Active',
-                  style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            ElevatedButton(
-                onPressed: () {
-                  formValidation();
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: Column(
+            children: [
+              const SizedBox(height: 10.0),
+              InkWell(
+                onTap: () {
+                  _getImage();
                 },
-                child: const Text("Submit"))
-          ],
+                child: CircleAvatar(
+                  radius: MediaQuery.of(context).size.width * 0.20,
+                  backgroundColor: Colors.white,
+                  backgroundImage: imageXFile == null
+                      ? null
+                      : FileImage(File(imageXFile!.path)),
+                  child: imageXFile == null
+                      ? Icon(
+                          Icons.add_photo_alternate,
+                          size: MediaQuery.of(context).size.width * 0.20,
+                          color: Colors.grey,
+                        )
+                      : null,
+                ),
+              ),
+              const SizedBox(height: 10.0),
+              TextFormField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  icon: Icon(Icons.person),
+                  hintText: 'Enter name',
+                  labelText: 'Name *',
+                ),
+              ),
+              const SizedBox(height: 10.0),
+              TextFormField(
+                controller: descriptionController,
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  icon: Icon(Icons.description),
+                  hintText: 'Enter Description',
+                  labelText: 'Description *',
+                ),
+              ),
+              const SizedBox(height: 10.0),
+              TextFormField(
+                controller: priceController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  icon: Icon(Icons.monetization_on),
+                  hintText: 'Enter Price',
+                  labelText: 'Price *',
+                ),
+              ),
+              const SizedBox(height: 10.0),
+              TextFormField(
+                controller: inStockController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  icon: Icon(Icons.stop_circle_rounded),
+                  hintText: 'Enter Stock',
+                  labelText: 'In-stock *',
+                ),
+              ),
+              const SizedBox(height: 10.0),
+              TextFormField(
+                controller: quantityController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  icon: Icon(Icons.queue),
+                  hintText: 'Enter Qty/Order',
+                  labelText: 'Quantity *',
+                ),
+              ),
+              const SizedBox(height: 10.0),
+              Row(
+                children: [
+                  Checkbox(
+                    value: isFeaturedValue,
+                    activeColor: blueLogo,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        isFeaturedValue = value!;
+                      });
+                    },
+                  ),
+                  const Text(
+                    'is-Active',
+                    style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              ElevatedButton(
+                  onPressed: () {
+                    formValidation();
+                  },
+                  child: const Text("Submit"))
+            ],
+          ),
         ),
       ),
     );
