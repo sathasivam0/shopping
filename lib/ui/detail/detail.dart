@@ -1,11 +1,11 @@
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:shopping/model/product_model.dart';
 import 'package:shopping/services/network/get_network_manager.dart';
 import 'package:shopping/services/offline/local_db_helper.dart';
 import 'package:shopping/services/online/service_url.dart';
+import 'package:shopping/utils/flutter_toast.dart';
 
 import '../../res/colors.dart';
 import '../../services/network/get_network_manager.dart';
@@ -25,52 +25,6 @@ class _DetailState extends State<Detail> {
   final DateFormat dateFormatForOrderNo = DateFormat("yyyymmddHHmmss");
 
   ProductsModel _productsModel = ProductsModel();
-
-  void checkValidation() {
-    // check network connection
-    if (GetXNetworkManager.to.connectionType == 0) {
-      // check sales is created or not
-      DBHelper.getSalesList().then((value) {
-        // sales item map
-        Map<String, dynamic> _saleItemMap = <String, dynamic>{};
-        // sale map
-        Map<String, dynamic> _saleMap = <String, dynamic>{};
-
-        if (value.isNotEmpty) {
-          _saleItemMap['product_id'] = _productsModel.id!;
-          _saleItemMap['unit_price'] =
-              double.parse(_productsModel.price.toString());
-          _saleItemMap['quantity'] = 2;
-          double aTotal = double.parse('${_productsModel.price! * 2}');
-          _saleItemMap['total'] = aTotal;
-          _saleItemMap['created_at'] = dateFormat.format(DateTime.now());
-          _saleItemMap['updated_at'] = dateFormat.format(DateTime.now());
-          _saleItemMap['is_sync'] = 0;
-
-          debugPrint(
-              'SHOW SALE ITEM TABLE VALIDATION NOT EMPTY: $_saleItemMap');
-
-          // add values to sales item table
-          DBHelper.insertValuesSalesItemTable(_saleItemMap);
-        } else {
-          _saleMap['order_no'] = dateFormatForOrderNo.format(DateTime.now());
-          _saleMap['ordered_at'] = dateFormat.format(DateTime.now());
-          _saleMap['total'] = 0;
-          _saleMap['created_at'] = dateFormat.format(DateTime.now());
-          _saleMap['updated_at'] = dateFormat.format(DateTime.now());
-          _saleMap['is_sync'] = 0;
-
-          debugPrint('SHOW SALE ITEM TABLE VALIDATION EMPTY: $_saleMap');
-          // create empty sales table first
-          DBHelper.insertValuesToSalesTable(_saleMap).then((value){
-            // add values to sales item table
-            DBHelper.insertValuesSalesItemTable(_saleItemMap);
-          });
-        }
-
-      });
-    } else {}
-  }
 
   dynamic emptyMapForGet = {};
 
@@ -106,17 +60,71 @@ class _DetailState extends State<Detail> {
         _productsModel.name = getRootMap!['name'];
         _productsModel.description = getRootMap!['description'];
         _productsModel.price = getRootMap!['price'];
+        _productsModel.id = getRootMap!['id'];
+        _productsModel.in_stock = getRootMap!['in_stock'];
+        _productsModel.qty_per_order = getRootMap!['qty_per_order'];
       });
     });
   }
 
   int myQuantity = 1;
 
+  void checkValidation() {
+    if (myQuantity > _productsModel.qty_per_order!) {
+      flutterToast(
+          color: Colors.red,
+          msg: 'You have reached maximum quantity per order');
+    } else if (myQuantity > _productsModel.in_stock!) {
+      flutterToast(color: Colors.red, msg: 'Out of Stock');
+    } else {
+      // check sales is created or not
+      DBHelper.getSalesList().then((value) {
+        // sales item map
+        Map<String, dynamic> _saleItemMap = <String, dynamic>{};
+        // sale map
+        Map<String, dynamic> _saleMap = <String, dynamic>{};
+
+        if (value.isNotEmpty) {
+          _saleItemMap['product_id'] = _productsModel.id!;
+          _saleItemMap['unit_price'] =
+              double.parse(_productsModel.price.toString());
+          _saleItemMap['quantity'] = myQuantity;
+          double aTotal = double.parse('${_productsModel.price! * myQuantity}');
+          _saleItemMap['total'] = aTotal;
+          _saleItemMap['created_at'] = dateFormat.format(DateTime.now());
+          _saleItemMap['updated_at'] = dateFormat.format(DateTime.now());
+          _saleItemMap['is_sync'] = 0;
+
+          debugPrint(
+              'SHOW SALE ITEM TABLE VALIDATION NOT EMPTY: $_saleItemMap');
+
+          // add values to sales item table
+          DBHelper.insertValuesSalesItemTable(_saleItemMap);
+        } else {
+          _saleMap['order_no'] = dateFormatForOrderNo.format(DateTime.now());
+          _saleMap['ordered_at'] = dateFormat.format(DateTime.now());
+          _saleMap['total'] = 0;
+          _saleMap['created_at'] = dateFormat.format(DateTime.now());
+          _saleMap['updated_at'] = dateFormat.format(DateTime.now());
+          _saleMap['is_sync'] = 0;
+
+          debugPrint('SHOW SALE ITEM TABLE VALIDATION EMPTY: $_saleMap');
+          // create empty sales table first
+          DBHelper.insertValuesToSalesTable(_saleMap).then((value) {
+            // add values to sales item table
+            DBHelper.insertValuesSalesItemTable(_saleItemMap);
+          });
+        }
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: const Text("Detail"),),
+        title: const Text("Detail"),
+      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -139,42 +147,52 @@ class _DetailState extends State<Detail> {
                 const SizedBox(height: 10.0),
                 Text("₹ ${_productsModel.price!}",
                     style: const TextStyle(
-                        color: black, fontWeight: FontWeight.bold,fontSize: 16.0)),
+                        color: black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16.0)),
                 const SizedBox(height: 10.0),
-                Row(
-                  children: [
-                    IconButton(
-                        onPressed: () {
-                          setState(() {
-                            if (myQuantity != 1) {
-                              myQuantity--;
-                            } else {}
-                          });
-                        },
-                        icon: const Icon(Icons.remove)),
-                    const SizedBox(width: 10.0),
-                    Text(myQuantity.toString(),style: const TextStyle(fontSize: 16.0),),
-                    const SizedBox(width: 10.0),
-                    IconButton(
-                        onPressed: () {
-                          setState(() {
-                            myQuantity++;
-                          });
-                        },
-                        icon: const Icon(Icons.add)),
-                  ],
+                Visibility(
+                  child: Row(
+                    children: [
+                      IconButton(
+                          onPressed: () {
+                            setState(() {
+                              if (myQuantity != 1) {
+                                myQuantity--;
+                              } else {}
+                            });
+                          },
+                          icon: const Icon(Icons.remove)),
+                      const SizedBox(width: 10.0),
+                      Text(
+                        myQuantity.toString(),
+                        style: const TextStyle(fontSize: 16.0),
+                      ),
+                      const SizedBox(width: 10.0),
+                      IconButton(
+                          onPressed: () {
+                            setState(() {
+                              myQuantity++;
+                            });
+                          },
+                          icon: const Icon(Icons.add)),
+                    ],
+                  ),
+                  visible: _productsModel.in_stock! > 0,
                 ),
               ],
             ),
           ),
-
           const SizedBox(height: 20.0),
           Center(
               child: ElevatedButton(
                   onPressed: () async {
                     checkValidation();
                   },
-                  child: const Text("Add to cart",style:TextStyle(fontSize: 18.0),)))
+                  child: const Text(
+                    "Add to cart",
+                    style: TextStyle(fontSize: 18.0),
+                  )))
         ],
       ),
     );

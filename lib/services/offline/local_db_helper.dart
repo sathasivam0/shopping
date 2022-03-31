@@ -64,6 +64,7 @@ class DBHelper {
     );
   }
 
+  /// Products Table
   // insert values to products table
   static Future<int> insertValuesToProductsTable(Map<String, dynamic> data) async {
     int result = 0;
@@ -90,12 +91,12 @@ class DBHelper {
     return list;
   }
 
-  // getting particular product detail by id
+  // getting particular product detail in offline by is_sync value equal to 0
   static Future<List<ProductsModel>> getParticularProductsInOffline(int is_sync) async {
     final db = await DBHelper.database();
     var res = await db.query("products", where: 'is_sync = ?', whereArgs: [is_sync]);
-    List<ProductsModel> list =
-    res.isNotEmpty ? res.map((c) => ProductsModel.fromMap(c)).toList() : [];
+    debugPrint('SHOW PRODUCT TABLE RECORDS IN OFFLINE:  $res');
+    List<ProductsModel> list = res.isNotEmpty ? res.map((c) => ProductsModel.fromMap(c)).toList() : [];
     return list;
   }
 
@@ -139,6 +140,15 @@ class DBHelper {
   static Future<List<SalesItemModel>> getSalesItemList() async {
     final db = await DBHelper.database();
     var res = await db.query("sales_item");
+    List<SalesItemModel> list = res.isNotEmpty ? res.map((c) => SalesItemModel.fromMap(c)).toList() : [];
+    return list;
+  }
+
+  // getting particular product detail in offline by is_sync value equal to 0
+  static Future<List<SalesItemModel>> getParticularSalesItemsInOffline(int is_sync) async {
+    final db = await DBHelper.database();
+    var res = await db.query("sales_item", where: 'is_sync = ?', whereArgs: [is_sync]);
+    debugPrint('SHOW SALES ITEM TABLE RECORDS IN OFFLINE:  $res');
     List<SalesItemModel> list = res.isNotEmpty ? res.map((c) => SalesItemModel.fromMap(c)).toList() : [];
     return list;
   }

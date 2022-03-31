@@ -66,7 +66,11 @@ class _HomeState extends State<Home> {
                   if (snapshot.hasData) {
                     List<ProductsModel>? data = snapshot.data;
                     if (data!.isEmpty) {
-                      return const Text("No data available");
+                      return Column(
+                        children: const [
+                          Text("No data available"),
+                        ],
+                      );
                     }
                     return ListView.builder(
                         itemCount: data.length,

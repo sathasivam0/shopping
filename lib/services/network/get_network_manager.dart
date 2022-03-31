@@ -10,6 +10,7 @@ class GetXNetworkManager extends GetxController {
   static GetXNetworkManager to = Get.find();
 
   int connectionType = 0;
+  dynamic map;
 
   final Connectivity _connectivity = Connectivity();
 
@@ -44,13 +45,19 @@ class GetXNetworkManager extends GetxController {
       case ConnectivityResult.wifi:
         debugPrint('WIFI CONNECTED');
         connectionType = 1;
+        // getting particular products details available in offline
         DBHelper.getParticularProductsInOffline(0);
+        // getting particular sale item details available in offline
+        DBHelper.getParticularSalesItemsInOffline(0);
         update();
         break;
       case ConnectivityResult.mobile:
         debugPrint('MOBILE CONNECTED');
         connectionType = 2;
+        // getting particular products details available in offline
         DBHelper.getParticularProductsInOffline(0);
+        // getting particular sale item details available in offline
+        DBHelper.getParticularSalesItemsInOffline(0);
         update();
         break;
       default:
