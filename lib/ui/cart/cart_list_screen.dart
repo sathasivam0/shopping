@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:shopping/model/sales_item_model.dart';
 import 'package:shopping/res/colors.dart';
