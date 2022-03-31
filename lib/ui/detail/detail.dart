@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:shopping/model/product_model.dart';
 import 'package:shopping/services/network/get_network_manager.dart';
 import 'package:shopping/services/offline/local_db_helper.dart';
 import 'package:shopping/services/online/service_url.dart';
+import 'package:shopping/ui/home/home.dart';
 import 'package:shopping/utils/flutter_toast.dart';
 
 import '../../res/colors.dart';
@@ -100,6 +101,9 @@ class _DetailState extends State<Detail> {
 
           // add values to sales item table
           DBHelper.insertValuesSalesItemTable(_saleItemMap);
+          flutterToast(
+              color: Colors.black, msg: 'Product Added to Cart Successfully');
+          Get.to(() => const Home());
         } else {
           _saleMap['order_no'] = dateFormatForOrderNo.format(DateTime.now());
           _saleMap['ordered_at'] = dateFormat.format(DateTime.now());
@@ -110,10 +114,12 @@ class _DetailState extends State<Detail> {
 
           debugPrint('SHOW SALE ITEM TABLE VALIDATION EMPTY: $_saleMap');
           // create empty sales table first
-          DBHelper.insertValuesToSalesTable(_saleMap).then((value) {
-            // add values to sales item table
-            DBHelper.insertValuesSalesItemTable(_saleItemMap);
-          });
+          DBHelper.insertValuesToSalesTable(_saleMap);
+          // add values to sales item table
+          DBHelper.insertValuesSalesItemTable(_saleItemMap);
+          flutterToast(
+              color: Colors.black, msg: 'Product Added to Cart Successfully');
+          Get.to(() => const Home());
         }
       });
     }
