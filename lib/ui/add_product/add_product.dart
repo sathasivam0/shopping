@@ -13,6 +13,7 @@ import 'package:shopping/services/online/service_request.dart';
 import 'package:shopping/services/online/service_url.dart';
 import 'package:shopping/ui/home/home.dart';
 import 'package:shopping/utils/error_dialog.dart';
+import 'package:shopping/utils/flutter_toast.dart';
 
 class AddProduct extends StatefulWidget {
   const AddProduct({Key? key}) : super(key: key);
@@ -44,14 +45,6 @@ class _AddProductState extends State<AddProduct> {
   }
 
   dynamic map;
-
-  Future<dynamic> addProductData(url, map) async {
-    var result = await ServiceRequest(url, map).postData();
-    bool status = result["status"];
-    if (status == true) {
-      debugPrint("Successfully added");
-    }
-  }
 
   DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -171,8 +164,16 @@ class _AddProductState extends State<AddProduct> {
         };
         addProductData(ServiceUrl.addProduct, map);
       }
-
+      flutterToast(color: Colors.black, msg: 'Product Added Successfully');
       Get.to(() => const Home());
+    }
+  }
+
+  Future<dynamic> addProductData(url, map) async {
+    var result = await ServiceRequest(url, map).postData();
+    bool status = result["status"];
+    if (status == true) {
+      debugPrint("Successfully added");
     }
   }
 

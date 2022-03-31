@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:shopping/model/sales_item_model.dart';
 import 'package:shopping/res/colors.dart';
@@ -12,6 +14,7 @@ class CartListScreen extends StatefulWidget {
 }
 
 class _CartListScreenState extends State<CartListScreen> {
+  double _sum = 0.0;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,6 +39,7 @@ class _CartListScreenState extends State<CartListScreen> {
                     itemCount: data.length,
                     itemBuilder: (context, index) {
                       SalesItemModel salesItemModel = data[index];
+                      showCurrentListTotalSum(data.length,salesItemModel,index);
                       return SizedBox(
                         height: 70.0,
                         child: Card(
@@ -70,4 +74,15 @@ class _CartListScreenState extends State<CartListScreen> {
       ),
     );
   }
+
+  void showCurrentListTotalSum(int length, SalesItemModel salesItemModel, int index) {
+    if(length > 0) {
+      _sum += salesItemModel.total!;
+    }
+    if(length != index) {
+      debugPrint('SHOW SALES AMOUNT: $_sum');
+    }
+
+  }
+
 }
