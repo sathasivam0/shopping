@@ -147,7 +147,7 @@ class _AddProductState extends State<AddProduct> {
       data['name'] = nameController.text.toString();
       data['slug'] = nameController.text.toString().toLowerCase();
       data['description'] = descriptionController.text.toLowerCase();
-      data['image'] = imageXFile == null ? "" : imageXFile!.path;
+      data['image'] = imageXFile == null ? "" : imageXFile!.path.toString();
       data['price'] = int.parse(priceController.text.toString());
       data['in_stock'] = int.parse(inStockController.text.toString());
       data['qty_per_order'] = int.parse(quantityController.text.toString());

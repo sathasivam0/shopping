@@ -12,6 +12,14 @@ class CartListScreen extends StatefulWidget {
 }
 
 class _CartListScreenState extends State<CartListScreen> {
+  late SalesItemModel salesItemModel;
+  double totalPrice = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,7 +43,9 @@ class _CartListScreenState extends State<CartListScreen> {
                 return ListView.builder(
                     itemCount: data.length,
                     itemBuilder: (context, index) {
-                      SalesItemModel salesItemModel = data[index];
+                      salesItemModel = data[index];
+                      totalPrice += salesItemModel.total!;
+                      debugPrint("$totalPrice");
                       return SizedBox(
                         height: 70.0,
                         child: Card(
@@ -67,6 +77,33 @@ class _CartListScreenState extends State<CartListScreen> {
               }
               return const Center(child: CircularProgressIndicator());
             }),
+      ),
+      bottomNavigationBar: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          // Text(salesItemModel.total.toString(),
+          //    style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)),
+          RichText(
+            text: TextSpan(children: [
+              TextSpan(
+                text: totalPrice.toString(),
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const TextSpan(
+                text: '\n Total Price ',
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500),
+              ),
+            ]),
+          ),
+          ElevatedButton(onPressed: () {}, child: const Text("Proceed"))
+        ],
       ),
     );
   }
