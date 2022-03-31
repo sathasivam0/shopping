@@ -70,6 +70,33 @@ class _CartListScreenState extends State<CartListScreen> {
               return const Center(child: CircularProgressIndicator());
             }),
       ),
+      bottomNavigationBar: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          // Text(salesItemModel.total.toString(),
+          // style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)),
+          RichText(
+            text: TextSpan(children: [
+              TextSpan(
+                text: _sum.toString(),
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const TextSpan(
+                text: '\n Total Price ',
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500),
+              ),
+            ]),
+          ),
+          ElevatedButton(onPressed: () {}, child: const Text("Proceed"))
+        ],
+      ),
     );
   }
 
