@@ -64,7 +64,7 @@ class ServiceRequest {
   Future<List<ProductsModel>> getProductData() async {
     final response = await http.get(Uri.parse(url), headers: header);
     if (response.statusCode == 200) {
-      var res = json.decode(response.body)["data"] as List;
+      var res = json.decode(response.body)["data"];
       List<ProductsModel> data = res
           .map<ProductsModel>((json) => ProductsModel.fromMap(json))
           .toList();

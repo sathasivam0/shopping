@@ -5,6 +5,7 @@ class ServiceUrl {
   static String addProduct = mainUrl + "products/store";
   static String detailProduct = mainUrl + "products/show/";
   static String sales = mainUrl + "sales";
+  static String salesStore = mainUrl + "sales/store";
 
 }
 

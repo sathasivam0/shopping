@@ -12,7 +12,18 @@ class CartListScreen extends StatefulWidget {
 }
 
 class _CartListScreenState extends State<CartListScreen> {
-  double _sum = 0.0;
+  double mySum = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    DBHelper.getTotal().then((value) {
+      setState(() {
+        mySum = double.parse(value.toString());
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,8 +48,6 @@ class _CartListScreenState extends State<CartListScreen> {
                     itemCount: data.length,
                     itemBuilder: (context, index) {
                       SalesItemModel salesItemModel = data[index];
-                      showCurrentListTotalSum(
-                          data.length, salesItemModel, index);
                       return SizedBox(
                         height: 70.0,
                         child: Card(
@@ -79,39 +88,52 @@ class _CartListScreenState extends State<CartListScreen> {
           RichText(
             text: TextSpan(children: [
               TextSpan(
-                text: _sum.toString(),
+                text: mySum.toString(),
                 style: const TextStyle(
                   color: Colors.black,
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const TextSpan(
                 text: '\nTotal Price ',
                 style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500),
+                  color: Colors.black,
+                  fontSize: 14,
+                ),
               ),
             ]),
           ),
-          ElevatedButton(onPressed: () {}, child: const Text("Proceed"))
+          ElevatedButton(
+              onPressed: () {
+                addItemsToCloud();
+              },
+              child: const Text("Proceed"))
         ],
       ),
     );
   }
 
-  void showCurrentListTotalSum(
-      int length, SalesItemModel salesItemModel, int index) {
-    if (length > 0) {
-      _sum += salesItemModel.total!;
-    }
-    if (length != index) {
-      setState(() {
-        _sum;
-        debugPrint('SALES AMOUNT: $_sum');
-      });
-      debugPrint('SHOW SALES AMOUNT: $_sum');
+  void addItemsToCloud() {
+    final DateFormat dateFormatForOrderNo = DateFormat("yyyymmddHHmmss");
+    DateFormat dateFormat = DateFormat("dd-MM-yyyy HH:mm:ss");
+
+    DBHelper.getSalesItemSelectedFields().then((value) {
+      Map<String, dynamic> mapQ = <String, dynamic>{};
+      mapQ['order_no'] = dateFormatForOrderNo.format(DateTime.now());
+      mapQ['ordered_at'] = dateFormat.format(DateTime.now());
+      mapQ['total'] = mySum;
+      mapQ['items'] = value;
+      debugPrint('$mapQ');
+      addProductData(ServiceUrl.salesStore, mapQ);
+    });
+  }
+
+  Future<dynamic> addProductData(url, map) async {
+    var result = await ServiceRequest(url, map).postData();
+    bool status = result["status"];
+    if (status == true) {
+      debugPrint("Successfully added");
     }
   }
 }

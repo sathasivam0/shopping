@@ -69,6 +69,13 @@ class DBHelper {
   static Future<int> insertValuesToProductsTable(Map<String, dynamic> data) async {
     int result = 0;
     final db = await DBHelper.database();
+
+    var maxIdResult = await db.rawQuery("SELECT MAX(id)+1 as last_inserted_id FROM products");
+    var id = maxIdResult.first["last_inserted_id"];
+    debugPrint('SHOW LAST ADDED PRODUCT ID: $id');
+
+    debugPrint('RECORD IS ADDED PRODUCTS TABLE:  $data');
+
     result = await db.insert('products', data, conflictAlgorithm: sql.ConflictAlgorithm.replace);
     debugPrint('RECORD IS ADDED PRODUCTS TABLE:  $result');
     return result;
@@ -78,6 +85,7 @@ class DBHelper {
   static Future<List<ProductsModel>> getProductsList() async {
     final db = await DBHelper.database();
     var res = await db.query("products");
+    debugPrint('VIEW PRODUCT LISTS: $res');
     List<ProductsModel> list = res.isNotEmpty ? res.map((c) => ProductsModel.fromMap(c)).toList() : [];
     return list;
   }
@@ -151,6 +159,20 @@ class DBHelper {
     debugPrint('SHOW SALES ITEM TABLE RECORDS IN OFFLINE:  $res');
     List<SalesItemModel> list = res.isNotEmpty ? res.map((c) => SalesItemModel.fromMap(c)).toList() : [];
     return list;
+  }
+
+  // get sum of total in sales item table
+  static Future getTotal() async {
+    final db = await DBHelper.database();
+    var result = await db.rawQuery("SELECT SUM(total) as Total FROM sales_item");
+    return result[0]['Total'];
+  }
+
+  static Future getSalesItemSelectedFields() async {
+    final db = await DBHelper.database();
+    var maps = await db.rawQuery("SELECT product_id,unit_price,quantity,total FROM sales_item");
+    debugPrint('SHOW SELECTED VALUES FROM THE LIST: $maps');
+    return maps.toList();
   }
 
   // to update a field in a table
