@@ -177,8 +177,6 @@ class _AddProductState extends State<AddProduct> {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
