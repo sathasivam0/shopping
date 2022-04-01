@@ -37,7 +37,8 @@ class _CartListScreenState extends State<CartListScreen> {
                     itemCount: data.length,
                     itemBuilder: (context, index) {
                       SalesItemModel salesItemModel = data[index];
-                      showCurrentListTotalSum(data.length,salesItemModel,index);
+                      showCurrentListTotalSum(
+                          data.length, salesItemModel, index);
                       return SizedBox(
                         height: 70.0,
                         child: Card(
@@ -86,7 +87,7 @@ class _CartListScreenState extends State<CartListScreen> {
                 ),
               ),
               const TextSpan(
-                text: '\n Total Price ',
+                text: '\nTotal Price ',
                 style: TextStyle(
                     color: Colors.black,
                     fontSize: 16,
@@ -100,14 +101,17 @@ class _CartListScreenState extends State<CartListScreen> {
     );
   }
 
-  void showCurrentListTotalSum(int length, SalesItemModel salesItemModel, int index) {
-    if(length > 0) {
+  void showCurrentListTotalSum(
+      int length, SalesItemModel salesItemModel, int index) {
+    if (length > 0) {
       _sum += salesItemModel.total!;
     }
-    if(length != index) {
+    if (length != index) {
+      setState(() {
+        _sum;
+        debugPrint('SALES AMOUNT: $_sum');
+      });
       debugPrint('SHOW SALES AMOUNT: $_sum');
     }
-
   }
-
 }

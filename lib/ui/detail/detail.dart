@@ -64,6 +64,7 @@ class _DetailState extends State<Detail> {
         _productsModel.id = getRootMap!['id'];
         _productsModel.in_stock = getRootMap!['in_stock'];
         _productsModel.qty_per_order = getRootMap!['qty_per_order'];
+        _productsModel.image = getRootMap!['image'];
       });
     });
   }
@@ -136,8 +137,18 @@ class _DetailState extends State<Detail> {
         children: [
           const SizedBox(height: 20.0),
           Center(
-              child: Image.asset("assets/men.png",
-                  height: 200.0, fit: BoxFit.cover)),
+            child: CircleAvatar(
+              backgroundColor: hintColor,
+              radius: 100,
+              // productsModel.image!.isEmpty ? null : aConnectionType == 0 ? FileImage(productsModel.image.toString()) : NetworkImage(productsModel.image!.toString())
+              backgroundImage: _productsModel.image!.isEmpty ? null : NetworkImage(_productsModel.image!.toString()),
+              child: _productsModel.image!.isEmpty ? const Icon(Icons.add_photo_alternate, size: 20,
+                color: Colors.grey,
+              )
+                  : null,
+            ),
+          ),
+
           const SizedBox(height: 35.0),
           Container(
             padding: const EdgeInsets.only(left: 15.0, top: 10.0),

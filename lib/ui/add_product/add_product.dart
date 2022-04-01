@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -14,6 +15,7 @@ import 'package:shopping/services/online/service_url.dart';
 import 'package:shopping/ui/home/home.dart';
 import 'package:shopping/utils/error_dialog.dart';
 import 'package:shopping/utils/flutter_toast.dart';
+import 'package:http/http.dart' as http;
 
 class AddProduct extends StatefulWidget {
   const AddProduct({Key? key}) : super(key: key);
@@ -41,6 +43,46 @@ class _AddProductState extends State<AddProduct> {
       } else {
         debugPrint('Please give permission');
       }
+    }
+  }
+
+
+
+  multipartProdecudre() async {
+
+    int isactive = isFeaturedValue ? 1 : 0;
+
+    //for multipartrequest
+    var request = http.MultipartRequest('POST', Uri.parse(ServiceUrl.addProduct));
+
+    //for token
+    request.headers.addAll({"Content-type": "multipart/form-data"});
+
+    //for image and videos and files
+
+    request.fields['name'] = nameController.text.toString();
+    request.fields['slug'] = nameController.text.toString().toLowerCase();
+    request.fields['description'] = descriptionController.text.toLowerCase();
+    request.fields['price'] = priceController.text.toString();
+    request.fields['in_stock'] = inStockController.text.toString();
+    request.fields['qty_per_order'] = quantityController.text.toString();
+    request.fields['is_active'] = isactive.toString();
+    request.files.add(await http.MultipartFile.fromPath("image", imageXFile!.path));
+
+
+    //for completeing the request
+    var response =await request.send();
+
+    //for getting and decoding the response into json format
+    var responsed = await http.Response.fromStream(response);
+    final responseData = json.decode(responsed.body);
+
+    if (response.statusCode==200) {
+      print("SUCCESS");
+      print(responseData);
+    }
+    else {
+      print("ERROR");
     }
   }
 
@@ -119,15 +161,7 @@ class _AddProductState extends State<AddProduct> {
               message: "Please enter quantity",
             );
           });
-    } else if (quantityController.text.length >= 10) {
-      showDialog(
-          context: context,
-          builder: (c) {
-            return const ErrorDialog(
-              message: "qty per order must be less than or equal to 10",
-            );
-          });
-    } else if (isFeaturedValue == false) {
+    }else if (isFeaturedValue == false) {
       showDialog(
           context: context,
           builder: (c) {
@@ -162,7 +196,9 @@ class _AddProductState extends State<AddProduct> {
           "qty_per_order" :quantityController.text.toString(),
           "is_active" : isFeaturedValue ? 1 : 0
         };
-        addProductData(ServiceUrl.addProduct, map);
+        // addProductData(ServiceUrl.addProduct, map);
+        multipartProdecudre();
+        debugPrint(map);
       }
       flutterToast(color: Colors.black, msg: 'Product Added Successfully');
       Get.to(() => const Home());
