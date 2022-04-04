@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -8,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shopping/res/colors.dart';
+import 'package:shopping/res/strings.dart';
 import 'package:shopping/services/network/get_network_manager.dart';
 import 'package:shopping/services/offline/local_db_helper.dart';
 import 'package:shopping/services/online/service_request.dart';
@@ -46,14 +46,11 @@ class _AddProductState extends State<AddProduct> {
     }
   }
 
-
-
   multipartProdecudre() async {
-
-    int isactive = isFeaturedValue ? 1 : 0;
-
-    //for multipartrequest
-    var request = http.MultipartRequest('POST', Uri.parse(ServiceUrl.addProduct));
+    int isActive = isFeaturedValue ? 1 : 0;
+    
+    var request =
+        http.MultipartRequest('POST', Uri.parse(ServiceUrl.addProduct));
 
     //for token
     request.headers.addAll({"Content-type": "multipart/form-data"});
@@ -62,31 +59,33 @@ class _AddProductState extends State<AddProduct> {
 
     request.fields['name'] = nameController.text.toString();
     request.fields['slug'] = nameController.text.toString().toLowerCase();
-    request.fields['description'] = descriptionController.text.toLowerCase();
+    request.fields['description'] = descriptionController.text.toString();
     request.fields['price'] = priceController.text.toString();
     request.fields['in_stock'] = inStockController.text.toString();
     request.fields['qty_per_order'] = quantityController.text.toString();
-    request.fields['is_active'] = isactive.toString();
-    request.files.add(await http.MultipartFile.fromPath("image", imageXFile!.path));
-
+    request.fields['is_active'] = isActive.toString();
+    if(imageXFile == null) {
+      request.fields['image'] = '';
+    } else {
+      request.files.add(await http.MultipartFile.fromPath("image", imageXFile!.path));
+    }
 
     //for completeing the request
-    var response =await request.send();
+    var response = await request.send();
 
     //for getting and decoding the response into json format
     var responsed = await http.Response.fromStream(response);
     final responseData = json.decode(responsed.body);
 
-    if (response.statusCode==200) {
+    if (response.statusCode == 200) {
       print("SUCCESS");
       print(responseData);
-    }
-    else {
+      flutterToast(color: Colors.black, msg: 'Product Added Successfully');
+      Get.off(() => const Home());
+    } else {
       print("ERROR");
     }
   }
-
-  dynamic map;
 
   DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -161,7 +160,7 @@ class _AddProductState extends State<AddProduct> {
               message: "Please enter quantity",
             );
           });
-    }else if (isFeaturedValue == false) {
+    } else if (isFeaturedValue == false) {
       showDialog(
           context: context,
           builder: (c) {
@@ -170,38 +169,31 @@ class _AddProductState extends State<AddProduct> {
             );
           });
     } else {
-      Map<String, dynamic> data = <String, dynamic>{};
-      data['name'] = nameController.text.toString();
-      data['slug'] = nameController.text.toString().toLowerCase();
-      data['description'] = descriptionController.text.toLowerCase();
-      data['image'] = imageXFile == null ? "" : imageXFile!.path.toString();
-      data['price'] = int.parse(priceController.text.toString());
-      data['in_stock'] = int.parse(inStockController.text.toString());
-      data['qty_per_order'] = int.parse(quantityController.text.toString());
-      data['is_active'] = isFeaturedValue ? 1 : 0;
-      data['created_at'] = dateFormat.format(DateTime.now());
-      data['updated_at'] = dateFormat.format(DateTime.now());
-      data['is_sync'] = 0;
       // if network is not available then add data to local DB
       // else add data to cloud
       if (GetXNetworkManager.to.connectionType == 0) {
-        DBHelper.insertValuesToProductsTable(data);
+
+        Map<String, dynamic> data = <String, dynamic>{};
+        data['name'] = nameController.text.toString();
+        data['slug'] = nameController.text.toString().toLowerCase();
+        data['description'] = descriptionController.text.toString();
+        data['image'] = imageXFile == null ? "" : imageXFile!.path.toString();
+        data['price'] = int.parse(priceController.text.toString());
+        data['in_stock'] = int.parse(inStockController.text.toString());
+        data['qty_per_order'] = int.parse(quantityController.text.toString());
+        data['is_active'] = isFeaturedValue ? 1 : 0;
+        data['created_at'] = dateFormat.format(DateTime.now());
+        data['updated_at'] = dateFormat.format(DateTime.now());
+        data['is_sync'] = 0;
+
+        DBHelper.insertValuesToProductsTable(data).then((value) {
+          flutterToast(color: Colors.black, msg: txtProductAdded);
+          Get.offAll(() => const Home());
+        });
+
       } else {
-        map = {
-          "name" : nameController.text.toString(),
-          "description" : descriptionController.text.toString(),
-          "image" :"",
-          "price" : priceController.text.toString(),
-          "in_stock" : inStockController.text.toString(),
-          "qty_per_order" :quantityController.text.toString(),
-          "is_active" : isFeaturedValue ? 1 : 0
-        };
-        // addProductData(ServiceUrl.addProduct, map);
         multipartProdecudre();
-        debugPrint(map);
       }
-      flutterToast(color: Colors.black, msg: 'Product Added Successfully');
-      Get.to(() => const Home());
     }
   }
 
@@ -218,7 +210,7 @@ class _AddProductState extends State<AddProduct> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
-          title: const Text("Add Product"),
+          title: const Text(txtAddToCart),
           systemOverlayStyle: SystemUiOverlayStyle.dark),
       body: SingleChildScrollView(
         child: Padding(
@@ -250,8 +242,8 @@ class _AddProductState extends State<AddProduct> {
                 controller: nameController,
                 decoration: const InputDecoration(
                   icon: Icon(Icons.person),
-                  hintText: 'Enter name',
-                  labelText: 'Name *',
+                  hintText: txtEnterName,
+                  labelText: txtName + txtStar,
                 ),
               ),
               const SizedBox(height: 10.0),
@@ -260,8 +252,8 @@ class _AddProductState extends State<AddProduct> {
                 maxLines: 3,
                 decoration: const InputDecoration(
                   icon: Icon(Icons.description),
-                  hintText: 'Enter Description',
-                  labelText: 'Description *',
+                  hintText: txtEnterDesc,
+                  labelText: txtDesc + txtStar,
                 ),
               ),
               const SizedBox(height: 10.0),
@@ -270,8 +262,8 @@ class _AddProductState extends State<AddProduct> {
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
                   icon: Icon(Icons.monetization_on),
-                  hintText: 'Enter Price',
-                  labelText: 'Price *',
+                  hintText:txtEnterPrice,
+                  labelText: txtPrice + txtStar,
                 ),
               ),
               const SizedBox(height: 10.0),
@@ -280,8 +272,8 @@ class _AddProductState extends State<AddProduct> {
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
                   icon: Icon(Icons.stop_circle_rounded),
-                  hintText: 'Enter Stock',
-                  labelText: 'In-stock *',
+                  hintText: txtEnterInStock,
+                  labelText: txtInStock + txtStar,
                 ),
               ),
               const SizedBox(height: 10.0),
@@ -290,8 +282,8 @@ class _AddProductState extends State<AddProduct> {
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
                   icon: Icon(Icons.queue),
-                  hintText: 'Enter Quantity Per Order',
-                  labelText: 'Quantity Per Order *',
+                  hintText: txtEnterQtyPerOrder,
+                  labelText: txtQtyPerOrder + txtStar,
                 ),
               ),
               const SizedBox(height: 10.0),
@@ -307,7 +299,7 @@ class _AddProductState extends State<AddProduct> {
                     },
                   ),
                   const Text(
-                    'is-Active',
+                    txtIsActive,
                     style:
                         TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),
                   ),
@@ -317,7 +309,7 @@ class _AddProductState extends State<AddProduct> {
                   onPressed: () {
                     formValidation();
                   },
-                  child: const Text("Submit"))
+                  child: const Text(txtSubmit))
             ],
           ),
         ),

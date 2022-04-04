@@ -1,6 +1,6 @@
-import 'package:shopping/services/network/get_network_manager.dart';
 // ignore_for_file: non_constant_identifier_names
 
+import 'package:shopping/services/network/get_network_manager.dart';
 class ProductsModel {
   int? id;
   String? name;
@@ -33,7 +33,7 @@ class ProductsModel {
     id = json['id'];
     name = json['name'] as String? ?? '';
     slug = json['slug'];
-    description = json['description'] as String? ?? '';
+    description = json['description'];
     image = json['image'];
     price = json['price'];
     in_stock = json['in_stock'];

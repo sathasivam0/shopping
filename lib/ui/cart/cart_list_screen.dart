@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:shopping/model/sales_item_model.dart';
 import 'package:shopping/res/colors.dart';
+import 'package:shopping/res/strings.dart';
 import 'package:shopping/services/offline/local_db_helper.dart';
+import 'package:shopping/services/online/service_request.dart';
+import 'package:shopping/services/online/service_url.dart';
+import 'package:shopping/ui/home/home.dart';
+import 'package:shopping/utils/flutter_toast.dart';
 import 'package:shopping/utils/screen_size.dart';
 
 class CartListScreen extends StatefulWidget {
@@ -19,7 +26,11 @@ class _CartListScreenState extends State<CartListScreen> {
     super.initState();
     DBHelper.getTotal().then((value) {
       setState(() {
-        mySum = double.parse(value.toString());
+        if ( value == null || value.toString().isEmpty) {
+          mySum = 0.0;
+        } else {
+          mySum = double.parse(value.toString());
+        }
       });
     });
   }
@@ -28,7 +39,7 @@ class _CartListScreenState extends State<CartListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cart'),
+        title: const Text(txtCart),
         automaticallyImplyLeading: true,
       ),
       body: Container(
@@ -42,7 +53,7 @@ class _CartListScreenState extends State<CartListScreen> {
               if (snapshot.hasData) {
                 List<SalesItemModel>? data = snapshot.data;
                 if (data!.isEmpty) {
-                  return const Center(child: Text("No data available"));
+                  return const Center(child: Text(txtNoDataAvailable));
                 }
                 return ListView.builder(
                     itemCount: data.length,
@@ -59,14 +70,13 @@ class _CartListScreenState extends State<CartListScreen> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                      'Product Id: ${salesItemModel.product_id.toString()}',
+                                  Text(txtProductId + salesItemModel.product_id.toString(),
                                       style: const TextStyle(
                                           fontSize: 15.0,
                                           fontWeight: FontWeight.bold)),
                                   const SizedBox(height: 5.0),
                                   Text(
-                                      'Price: ${salesItemModel.total.toString()}'),
+                                      txtPrice + salesItemModel.total.toString()),
                                 ],
                               )
                             ],
@@ -96,7 +106,7 @@ class _CartListScreenState extends State<CartListScreen> {
                 ),
               ),
               const TextSpan(
-                text: '\nTotal Price ',
+                text: '\n' + txtTotalPrice,
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 14,
@@ -108,7 +118,7 @@ class _CartListScreenState extends State<CartListScreen> {
               onPressed: () {
                 addItemsToCloud();
               },
-              child: const Text("Proceed"))
+              child: const Text(txtProceed))
         ],
       ),
     );
@@ -118,14 +128,22 @@ class _CartListScreenState extends State<CartListScreen> {
     final DateFormat dateFormatForOrderNo = DateFormat("yyyymmddHHmmss");
     DateFormat dateFormat = DateFormat("dd-MM-yyyy HH:mm:ss");
 
-    DBHelper.getSalesItemSelectedFields().then((value) {
+    DBHelper.getSalesItemTableSelectedFields().then((value) {
       Map<String, dynamic> mapQ = <String, dynamic>{};
       mapQ['order_no'] = dateFormatForOrderNo.format(DateTime.now());
       mapQ['ordered_at'] = dateFormat.format(DateTime.now());
       mapQ['total'] = mySum;
       mapQ['items'] = value;
+
       debugPrint('$mapQ');
+
       addProductData(ServiceUrl.salesStore, mapQ);
+
+      for (var v in value) {
+        print("Value3: $v");
+        print("Value3: ${v['product_id']}");
+        DBHelper.deleteSalesItem(v['product_id']);
+      }
     });
   }
 
@@ -133,7 +151,10 @@ class _CartListScreenState extends State<CartListScreen> {
     var result = await ServiceRequest(url, map).postData();
     bool status = result["status"];
     if (status == true) {
+      flutterToast(
+          color: Colors.black, msg: txtProductAddedToSales);
       debugPrint("Successfully added");
+      Get.offAll(() => const Home());
     }
   }
 }

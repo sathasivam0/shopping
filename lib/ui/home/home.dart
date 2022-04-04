@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shopping/model/product_model.dart';
 import 'package:shopping/res/colors.dart';
+import 'package:shopping/res/strings.dart';
 import 'package:shopping/services/offline/local_db_helper.dart';
 import 'package:shopping/services/online/service_request.dart';
 import 'package:shopping/services/online/service_url.dart';
@@ -26,7 +27,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home'),
+        title: const Text(txtHome),
         actions: [
           IconButton(
               icon: const Icon(Icons.credit_card),
@@ -66,11 +67,7 @@ class _HomeState extends State<Home> {
                   if (snapshot.hasData) {
                     List<ProductsModel>? data = snapshot.data;
                     if (data!.isEmpty) {
-                      return Column(
-                        children: const [
-                          Text("No data available"),
-                        ],
-                      );
+                      return const Center(child: Text(txtNoDataAvailable));
                     }
                     return ListView.builder(
                         itemCount: data.length,
@@ -91,9 +88,15 @@ class _HomeState extends State<Home> {
                                     CircleAvatar(
                                       backgroundColor: hintColor,
                                       radius: 20,
-                                        // productsModel.image!.isEmpty ? null : aConnectionType == 0 ? FileImage(productsModel.image.toString()) : NetworkImage(productsModel.image!.toString())
-                                      backgroundImage: productsModel.image!.isEmpty ? null : NetworkImage(productsModel.image!.toString()),
-                                      child: productsModel.image!.isEmpty ? const Icon(Icons.add_photo_alternate, size: 20,
+                                      backgroundImage: productsModel
+                                              .image!.isEmpty
+                                          ? null
+                                          : NetworkImage(
+                                              productsModel.image!.toString()),
+                                      child: productsModel.image!.isEmpty
+                                          ? const Icon(
+                                              Icons.add_photo_alternate,
+                                              size: 20,
                                               color: Colors.grey,
                                             )
                                           : null,
@@ -122,7 +125,15 @@ class _HomeState extends State<Home> {
                   } else if (snapshot.hasError) {
                     return Text("${snapshot.error}");
                   }
-                  return const Center(child: CircularProgressIndicator());
+                  return Container(
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.only(top: 12),
+                    child: const CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation(
+                        Colors.amber,
+                      ),
+                    ),
+                  );
                 });
           },
         ),

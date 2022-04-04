@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:shopping/model/product_model.dart';
+import 'package:shopping/res/strings.dart';
 import 'package:shopping/services/network/get_network_manager.dart';
 import 'package:shopping/services/offline/local_db_helper.dart';
 import 'package:shopping/services/online/service_url.dart';
-import 'package:shopping/ui/home/home.dart';
 import 'package:shopping/utils/flutter_toast.dart';
 
 import '../../res/colors.dart';
@@ -31,6 +30,10 @@ class _DetailState extends State<Detail> {
 
   Map<String, dynamic>? getRootMap;
 
+  String myProductPrice = "", myName = "", myDescription = "", myImage = "";
+  int myProductStock = 0;
+  bool isLoading = false;
+
   @override
   void initState() {
     super.initState();
@@ -38,7 +41,13 @@ class _DetailState extends State<Detail> {
       DBHelper.getParticularProductDetails(widget.id).then((value) {
         if (value.isNotEmpty) {
           setState(() {
+            isLoading = true;
             _productsModel = value[0];
+            myProductPrice = _productsModel.price!.toString();
+            myName = _productsModel.name.toString();
+            myDescription = _productsModel.description.toString();
+            myImage = _productsModel.image!;
+            myProductStock = _productsModel.in_stock!;
           });
         }
         debugPrint('VIEW ADDED RECORDS IN CLASS: ${_productsModel.name}');
@@ -58,6 +67,9 @@ class _DetailState extends State<Detail> {
         debugPrint('getRootMap');
         debugPrint('${getRootMap!}');
         debugPrint('${getRootMap!['name']}');
+
+        isLoading = true;
+        myProductPrice = getRootMap!['price'].toString();
         _productsModel.name = getRootMap!['name'];
         _productsModel.description = getRootMap!['description'];
         _productsModel.price = getRootMap!['price'];
@@ -65,6 +77,11 @@ class _DetailState extends State<Detail> {
         _productsModel.in_stock = getRootMap!['in_stock'];
         _productsModel.qty_per_order = getRootMap!['qty_per_order'];
         _productsModel.image = getRootMap!['image'];
+
+        myName = getRootMap!['name'];
+        myDescription = getRootMap!['description'];
+        myImage = getRootMap!['image'];
+        myProductStock = getRootMap!['in_stock'];
       });
     });
   }
@@ -73,11 +90,9 @@ class _DetailState extends State<Detail> {
 
   void checkValidation() {
     if (myQuantity > _productsModel.qty_per_order!) {
-      flutterToast(
-          color: Colors.red,
-          msg: 'You have reached maximum quantity per order');
+      flutterToast(color: Colors.red, msg: txtMaximumQty);
     } else if (myQuantity > _productsModel.in_stock!) {
-      flutterToast(color: Colors.red, msg: 'Out of Stock');
+      flutterToast(color: Colors.red, msg: txtOutOfStock);
     } else {
       // check sales is created or not
       DBHelper.getSalesList().then((value) {
@@ -100,11 +115,18 @@ class _DetailState extends State<Detail> {
           debugPrint(
               'SHOW SALE ITEM TABLE VALIDATION NOT EMPTY: $_saleItemMap');
 
-          // add values to sales item table
-          DBHelper.insertValuesSalesItemTable(_saleItemMap);
-          flutterToast(
-              color: Colors.black, msg: 'Product Added to Cart Successfully');
-          Get.to(() => const Home());
+          DBHelper.getParticularSalesItemAddedOrNot(_productsModel.id!)
+              .then((value) {
+            // check if the product is already added to cart or not
+            if (value.isEmpty) {
+              // add values to sales item table
+              DBHelper.insertValuesSalesItemTable(_saleItemMap);
+              flutterToast(color: Colors.black, msg: txtAddedToCart);
+            } else {
+              flutterToast(color: Colors.red, msg: txtAlreadyAdded);
+            }
+          });
+          // Get.to(() => const Home());
         } else {
           _saleMap['order_no'] = dateFormatForOrderNo.format(DateTime.now());
           _saleMap['ordered_at'] = dateFormat.format(DateTime.now());
@@ -118,9 +140,8 @@ class _DetailState extends State<Detail> {
           DBHelper.insertValuesToSalesTable(_saleMap);
           // add values to sales item table
           DBHelper.insertValuesSalesItemTable(_saleItemMap);
-          flutterToast(
-              color: Colors.black, msg: 'Product Added to Cart Successfully');
-          Get.to(() => const Home());
+          flutterToast(color: Colors.black, msg: txtAddedToCart);
+          // Get.to(() => const Home());
         }
       });
     }
@@ -130,88 +151,107 @@ class _DetailState extends State<Detail> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Detail"),
+        title: const Text(txtDetail),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 20.0),
-          Center(
-            child: CircleAvatar(
-              backgroundColor: hintColor,
-              radius: 100,
-              // productsModel.image!.isEmpty ? null : aConnectionType == 0 ? FileImage(productsModel.image.toString()) : NetworkImage(productsModel.image!.toString())
-              backgroundImage: _productsModel.image!.isEmpty ? null : NetworkImage(_productsModel.image!.toString()),
-              child: _productsModel.image!.isEmpty ? const Icon(Icons.add_photo_alternate, size: 20,
-                color: Colors.grey,
-              )
-                  : null,
-            ),
-          ),
-
-          const SizedBox(height: 35.0),
-          Container(
-            padding: const EdgeInsets.only(left: 15.0, top: 10.0),
-            child: Column(
+      body: isLoading
+          ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(_productsModel.name!,
-                    style:
-                        const TextStyle(color: txtGreyColor, fontSize: 25.0)),
-                const SizedBox(height: 10.0),
-                Text(_productsModel.description!,
-                    style: const TextStyle(color: black, fontSize: 18.0)),
-                const SizedBox(height: 10.0),
-                Text("₹ ${_productsModel.price!}",
-                    style: const TextStyle(
-                        color: black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.0)),
-                const SizedBox(height: 10.0),
-                Visibility(
-                  child: Row(
+                const SizedBox(height: 20.0),
+                Center(
+                  child: CircleAvatar(
+                    backgroundColor: hintColor,
+                    radius: 100,
+                    backgroundImage: myImage.isEmpty
+                        ? null
+                        : NetworkImage(myImage.toString()),
+                    child: myImage.isEmpty
+                        ? const Icon(
+                            Icons.add_photo_alternate,
+                            size: 20,
+                            color: Colors.grey,
+                          )
+                        : null,
+                  ),
+                ),
+                const SizedBox(height: 35.0),
+                Container(
+                  padding: const EdgeInsets.only(left: 15.0, top: 10.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      IconButton(
-                          onPressed: () {
-                            setState(() {
-                              if (myQuantity != 1) {
-                                myQuantity--;
-                              } else {}
-                            });
-                          },
-                          icon: const Icon(Icons.remove)),
-                      const SizedBox(width: 10.0),
+                      Text(myName.isNotEmpty ? myName : "",
+                          style: const TextStyle(
+                              color: txtGreyColor, fontSize: 25.0)),
+                      const SizedBox(height: 10.0),
                       Text(
-                        myQuantity.toString(),
-                        style: const TextStyle(fontSize: 16.0),
+                          myDescription.isNotEmpty
+                              ? myDescription == 'null'
+                                  ? ""
+                                  : myDescription
+                              : "",
+                          style: const TextStyle(color: black, fontSize: 18.0)),
+                      const SizedBox(height: 10.0),
+                      Text(
+                          "₹ ${myProductPrice.isNotEmpty ? myProductPrice : ""}",
+                          style: const TextStyle(
+                              color: black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16.0)),
+                      const SizedBox(height: 10.0),
+                      Visibility(
+                        child: Row(
+                          children: [
+                            IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    if (myQuantity != 1) {
+                                      myQuantity--;
+                                    } else {}
+                                  });
+                                },
+                                icon: const Icon(Icons.remove)),
+                            const SizedBox(width: 10.0),
+                            Text(
+                              myQuantity.toString(),
+                              style: const TextStyle(fontSize: 16.0),
+                            ),
+                            const SizedBox(width: 10.0),
+                            IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    myQuantity++;
+                                  });
+                                },
+                                icon: const Icon(Icons.add)),
+                          ],
+                        ),
+                        visible: myProductStock > 0,
                       ),
-                      const SizedBox(width: 10.0),
-                      IconButton(
-                          onPressed: () {
-                            setState(() {
-                              myQuantity++;
-                            });
-                          },
-                          icon: const Icon(Icons.add)),
                     ],
                   ),
-                  visible: _productsModel.in_stock! > 0,
                 ),
+                const SizedBox(height: 20.0),
+                Center(
+                    child: ElevatedButton(
+                        onPressed: () async {
+                          checkValidation();
+                        },
+                        child: const Text(
+                          txtAddToCart,
+                          style: TextStyle(fontSize: 18.0),
+                        )))
               ],
+            )
+          : Container(
+              alignment: Alignment.center,
+              padding: const EdgeInsets.only(top: 12),
+              child: const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(
+                  Colors.amber,
+                ),
+              ),
             ),
-          ),
-          const SizedBox(height: 20.0),
-          Center(
-              child: ElevatedButton(
-                  onPressed: () async {
-                    checkValidation();
-                  },
-                  child: const Text(
-                    "Add to cart",
-                    style: TextStyle(fontSize: 18.0),
-                  )))
-        ],
-      ),
     );
   }
 }

@@ -65,9 +65,7 @@ class ServiceRequest {
     final response = await http.get(Uri.parse(url), headers: header);
     if (response.statusCode == 200) {
       var res = json.decode(response.body)["data"];
-      List<ProductsModel> data = res
-          .map<ProductsModel>((json) => ProductsModel.fromMap(json))
-          .toList();
+      List<ProductsModel> data = res.map<ProductsModel>((json) => ProductsModel.fromMap(json)).toList();
       return data;
     } else {
       throw Exception('Failed to load jobs from API');

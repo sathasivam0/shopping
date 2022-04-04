@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:shopping/services/network/get_network_manager.dart';
 
 class SalesItemModel {
