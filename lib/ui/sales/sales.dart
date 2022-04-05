@@ -44,9 +44,7 @@ class _SalesState extends State<Sales> {
                     itemCount: data.length,
                     itemBuilder: (context, index) {
                       SalesModel salesModel = data[index];
-                      String dateTime = DateFormat('dd-MM-yyyy')
-                          .parse(salesModel.ordered_at.toString())
-                          .toString();
+                      String dateWithT = salesModel.ordered_at.toString().substring(0, 10);
                       return SizedBox(
                         height: 70.0,
                         child: GestureDetector(
@@ -65,7 +63,7 @@ class _SalesState extends State<Sales> {
                                             fontSize: 15.0,
                                             fontWeight: FontWeight.bold)),
                                     const SizedBox(height: 5.0),
-                                    Text("Date: " + dateTime),
+                                    Text("Date: " + dateWithT),
                                   ],
                                 )
                               ],

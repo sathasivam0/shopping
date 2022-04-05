@@ -49,11 +49,11 @@ class _AddProductState extends State<AddProduct> {
   multipartProdecudre() async {
     int isActive = isFeaturedValue ? 1 : 0;
     
-    var request =
-        http.MultipartRequest('POST', Uri.parse(ServiceUrl.addProduct));
+    var request = http.MultipartRequest('POST', Uri.parse(ServiceUrl.addProduct));
 
     //for token
     request.headers.addAll({"Content-type": "multipart/form-data"});
+    request.headers.addAll({"Accept": "application/json"});
 
     //for image and videos and files
 
@@ -81,9 +81,16 @@ class _AddProductState extends State<AddProduct> {
       print("SUCCESS");
       print(responseData);
       flutterToast(color: Colors.black, msg: 'Product Added Successfully');
-      Get.off(() => const Home());
+      Get.offAll(() => const Home());
     } else {
-      print("ERROR");
+      print("ERROR: $responseData" );
+      showDialog(
+          context: context,
+          builder: (c) {
+            return ErrorDialog(
+              message: responseData['message'].toString(),
+            );
+          });
     }
   }
 

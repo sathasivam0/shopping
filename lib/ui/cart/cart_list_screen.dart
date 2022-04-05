@@ -137,23 +137,23 @@ class _CartListScreenState extends State<CartListScreen> {
 
       debugPrint('$mapQ');
 
-      addProductData(ServiceUrl.salesStore, mapQ);
-
-      for (var v in value) {
-        print("Value3: $v");
-        print("Value3: ${v['product_id']}");
-        DBHelper.deleteSalesItem(v['product_id']);
-      }
+      addProductData(ServiceUrl.salesStore, mapQ,value);
     });
   }
 
-  Future<dynamic> addProductData(url, map) async {
+  Future<dynamic> addProductData(url, map, value) async {
     var result = await ServiceRequest(url, map).postData();
     bool status = result["status"];
     if (status == true) {
       flutterToast(
           color: Colors.black, msg: txtProductAddedToSales);
       debugPrint("Successfully added");
+
+      for (var v in value) {
+        print("Value3: $v");
+        print("Value3: ${v['product_id']}");
+        DBHelper.deleteSalesItem(v['product_id']);
+      }
       Get.offAll(() => const Home());
     }
   }
