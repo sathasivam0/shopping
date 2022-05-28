@@ -6,6 +6,7 @@ import 'package:sqflite/sqflite.dart' as sql;
 import 'package:path/path.dart' as path;
 
 class DBHelper {
+
   /// Table Creation
   // creating products table
   static const String myProductsTable = "CREATE TABLE IF NOT EXISTS products(" +
@@ -63,7 +64,6 @@ class DBHelper {
   }
 
   /// Products Table Beginning
-
   // insert values to products table
   static Future<int> insertValuesToProductsTable(
       Map<String, dynamic> data) async {
